@@ -1,0 +1,22 @@
+[
+  {
+    "source": "Uruguay - Banco Central del Uruguay (BCU) Comunicación 2021/2318 y Circular 2318",
+    "text": "- Jurisdicción: Uruguay (Sector Financiero / Banco Central del Uruguay)\n- Plazo de Notificación: Plazo máximo e improrrogable de 24 horas contadas a partir de la detección o sospecha razonable del evento.\n- Autoridad Competente: Banco Central del Uruguay (BCU) y URCDP (Unidad Reguladora y de Control de Datos Personales).\n- Alcance: Entidades reguladas por el BCU (bancos, procesadores de pago, emisores de tarjetas de crédito/débito).\n- Obligaciones: Reportar al regulador financiero todo incidente de seguridad de la información calificado como crítico.\n- Sanciones y Multas: Apercibimientos, inhabilitación temporal de directores, multas de hasta 2,000,000 de Unidades Indexadas (UI) y revocación de la licencia para operar."
+  },
+  {
+    "source": "México - Secretaría de Salud (NOM-004-SSA3-2012) e INAI (LGPDPPSO)",
+    "text": "- Jurisdicción: México (Sector Salud / Datos Sensibles)\n- Plazo de Notificación: Dentro de las 72 horas hábiles contadas a partir de que se tenga conocimiento del incidente.\n- Autoridad Competente: INAI (Instituto Nacional de Transparencia, Acceso a la Información y Protección de Datos Personales) y Secretaría de Salud.\n- Alcance: Instituciones y prestadores de servicios de salud públicos y privados que traten expedientes clínicos electrónicos (datos de salud/sensibles).\n- Obligaciones: Dar aviso obligatorio tanto a los titulares afectados como al INAI ante cualquier brecha de seguridad (acceso no autorizado, pérdida, copia o alteración de fichas clínicas).\n- Sanciones y Multas: Multas de hasta 320,000 Unidades de Medida y Actualización (UMA) de acuerdo con la ley, e inhabilitación del personal médico y directivo involucrado en la negligencia."
+  },
+  {
+    "source": "Brasil - Lei Geral de Proteção de Datos (LGPD - Ley 13.709) y ANPD",
+    "text": "- Jurisdicción: Brasil (General)\n- Plazo de Notificación: En un plazo razonable (interpretado doctrinaria y administrativamente por la ANPD como un período de 48 a 72 horas a partir del conocimiento del incidente).\n- Autoridad Competente: ANPD (Autoridade Nacional de Proteção de Dados).\n- Alcance: Cualquier organización pública o privada que realice tratamiento de datos personales en territorio brasileño.\n- Obligaciones: Comunicar a la ANPD y a los titulares la ocurrencia de cualquier incidente de seguridad que pueda generar riesgo o daño relevante para los individuos (Art. 48 de la LGPD).\n- Sanciones y Multas: Multas de hasta el 2% de la facturación de la persona jurídica en Brasil, con un tope de 50,000,000 de reales por infracción."
+  },
+  {
+    "source": "Chile - Ley Marco de Ciberseguridad e Infraestructura Crítica y CSIRT Nacional",
+    "text": "- Jurisdicción: Chile (Infraestructura Crítica / Servicios Esenciales)\n- Plazo de Notificación: Notificación inicial inmediata, no debiendo exceder las 3 horas contadas desde el inicio de la contención técnica o el conocimiento del incidente.\n- Autoridad Competente: CSIRT Nacional (Subsecretaría del Interior) y superintendencias sectoriales correspondientes.\n- Alcance: Operadores de infraestructura crítica de la información y proveedores de servicios esenciales (salud, finanzas, transporte, energía, telecomunicaciones).\n- Obligaciones: Notificar al CSIRT Nacional y a las superintendencias correspondientes cualquier incidente de ciberseguridad calificado como de impacto significativo o grave.\n- Sanciones y Multas: Multas que pueden alcanzar hasta las 15,000 UTM (Unidades Tributarias Mensuales) para operadores públicos o privados esenciales."
+  },
+  {
+    "source": "Estándares Globales de Ciberseguridad y Gobernanza (ISO/IEC 27001 y NIST SP 800-61)",
+    "text": "- Nivel de Regulación: Estándares Internacionales y Directrices Técnicas.\n- Referencias Técnicas: ISO/IEC 27001:2022 Control A.5.34 (Gestión de Incidentes) y NIST SP 800-61 Rev 2 (Guía de Manejo de Incidentes de Seguridad Informática).\n- Fases Recomendadas: Preparación, Detección y Análisis, Contención, Erradicación y Recuperación, y Actividades Post-Incidente.\n- Obligaciones Operativas: Documentar sistemáticamente el análisis forense, registrar lecciones aprendidas y establecer planes de comunicación diferenciando contención técnica de notificaciones regulatorias."
+  }
+]

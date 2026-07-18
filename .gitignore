@@ -1,0 +1,24 @@
+# Archivos de Sistema
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+
+# Logs y bases de datos temporales
+*.log
+.chroma/
+chromadb/
+
+# Credenciales y variables de entorno locales
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
