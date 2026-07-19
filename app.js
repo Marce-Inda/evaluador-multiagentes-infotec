@@ -2,9 +2,32 @@
    APPLICATION LOGIC - APP.JS
    Vanilla JavaScript with dynamic HTML5 rendering and resilient APIs
    ========================================================================== */
-
-// CONSTANTES Y CONFIGURACIONES
 const BACKEND_URL = "https://boudiccadaain-soc-tutor-backend.hf.space";
+
+// CONFIGURACIÓN DE FIREBASE E INICIALIZACIÓN DE FIRESTORE
+const firebaseConfig = {
+    projectId: "the-responder-264f2",
+    appId: "1:717129732306:web:8393356d38f7735eeddd0b",
+    storageBucket: "the-responder-264f2.firebasestorage.app",
+    apiKey: "AIzaSyAy_bIBJelfHcMBx2QHr_hwtWjAa3_LKX0",
+    authDomain: "the-responder-264f2.firebaseapp.com",
+    messagingSenderId: "717129732306",
+    measurementId: "G-XWHLRRVZ68"
+};
+
+let db = null;
+const isFirebaseAvailable = typeof firebase !== "undefined";
+if (isFirebaseAvailable) {
+    try {
+        const firebaseApp = firebase.initializeApp(firebaseConfig);
+        db = firebaseApp.firestore();
+        console.log("✓ [Firebase] Inicializado con éxito.");
+    } catch (e) {
+        console.error("❌ [Firebase] Error de inicialización:", e);
+    }
+} else {
+    console.warn("⚠️ [Firebase] No disponible (Modo Offline o error de red CDN).");
+}
 
 // Base de datos de leyes interna (Fallback local ante fallos CORS en protocolo file://)
 const FALLBACK_REGULATORY_DATABASE = [
@@ -263,6 +286,28 @@ const MOCK_IA_RESPONSES = {
     }
 };
 
+// FUNCIÓN DE CONTRABALANCEO LATINO (Matriz de asignación de Grupo + Escenario)
+function getExperimentParameters(startingGroup, runNumber) {
+    let group = 'A';
+    let scenarioId = '1';
+    
+    if (startingGroup === 'A') {
+        if (runNumber === 1) { group = 'A'; scenarioId = '1'; }
+        else if (runNumber === 2) { group = 'B'; scenarioId = '2'; }
+        else if (runNumber === 3) { group = 'C'; scenarioId = '3'; }
+    } else if (startingGroup === 'B') {
+        if (runNumber === 1) { group = 'B'; scenarioId = '2'; }
+        else if (runNumber === 2) { group = 'C'; scenarioId = '3'; }
+        else if (runNumber === 3) { group = 'A'; scenarioId = '1'; }
+    } else if (startingGroup === 'C') {
+        if (runNumber === 1) { group = 'C'; scenarioId = '3'; }
+        else if (runNumber === 2) { group = 'A'; scenarioId = '1'; }
+        else if (runNumber === 3) { group = 'B'; scenarioId = '2'; }
+    }
+    
+    return { group, scenarioId };
+}
+
 // ESTADO GLOBAL DE LA APP
 let appState = {
     participantId: "ANON",
@@ -280,7 +325,10 @@ let appState = {
     answers: {},
     quizScore: 0,
     csvLogs: [],
-    isDemoMode: false
+    isDemoMode: false,
+    runNumber: 1,
+    startingGroup: null,
+    accessCode: ""
 };
 
 // SELECTORES DOM
@@ -320,6 +368,53 @@ function showPhase(phaseNum) {
     Object.values(phases).forEach(p => p.classList.add("hidden"));
     phases[phaseNum].classList.remove("hidden");
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Guardar estado en sessionStorage para recuperación ante fallos de conexión o recargas accidentales
+    sessionStorage.setItem("currentPhase", phaseNum);
+    sessionStorage.setItem("accessCode", appState.accessCode);
+    sessionStorage.setItem("participantId", appState.participantId);
+    sessionStorage.setItem("experience", appState.experience);
+    sessionStorage.setItem("geminiApiKey", appState.geminiApiKey);
+    sessionStorage.setItem("groqApiKey", appState.groqApiKey);
+    sessionStorage.setItem("openrouterApiKey", appState.openrouterApiKey);
+    sessionStorage.setItem("runNumber", appState.runNumber);
+    sessionStorage.setItem("startingGroup", appState.startingGroup || "");
+    sessionStorage.setItem("activeGroup", appState.activeGroup);
+    sessionStorage.setItem("selectedScenarioId", appState.selectedScenarioId);
+    sessionStorage.setItem("isDemoMode", appState.isDemoMode);
+    sessionStorage.setItem("csvLogs", JSON.stringify(appState.csvLogs));
+
+    if (phaseNum === 2) {
+        const assignedRunContainer = document.getElementById("assigned-run-container");
+        const manualScenariosContainer = document.getElementById("manual-scenarios-container");
+        if (appState.isDemoMode) {
+            assignedRunContainer.classList.add("hidden");
+            manualScenariosContainer.classList.remove("hidden");
+        } else {
+            assignedRunContainer.classList.remove("hidden");
+            manualScenariosContainer.classList.add("hidden");
+            
+            // Asignar parámetros según la matriz de contrabalanceo
+            const { group, scenarioId } = getExperimentParameters(appState.startingGroup, appState.runNumber);
+            appState.activeGroup = group;
+            appState.selectedScenarioId = scenarioId;
+            
+            const scenario = SCENARIOS[scenarioId];
+            
+            document.getElementById("assigned-run-subtitle").innerText = `CORRIDA ${appState.runNumber} DE 3`;
+            document.getElementById("assigned-run-title").innerText = scenario.title;
+            
+            let groupLabel = "Grupo C: Motor Multi-Agente";
+            if (group === "A") groupLabel = "Grupo A: Búsqueda Manual";
+            if (group === "B") groupLabel = "Grupo B: IA Básica";
+            
+            document.getElementById("assigned-run-details").innerHTML = `
+                <strong>Caso / Tipo:</strong> ${scenario.type}<br>
+                <strong>Jurisdicción:</strong> ${scenario.jurisdiction}<br>
+                <strong>Soporte tecnológico asignado:</strong> ${groupLabel}
+            `;
+        }
+    }
 }
 
 // CONTROLADORES DE EVENTOS Y ENLACES
@@ -358,9 +453,57 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     appState.activeGroup = urlGroup;
+    appState.startingGroup = urlGroup;
 
     // Configurar la visibilidad de la interfaz según el grupo
     setupExperimentalUI(urlGroup, isProduction);
+
+    // Intentar recuperar sesión activa existente ante recargas de página accidentales
+    const cachedAccessCode = sessionStorage.getItem("accessCode");
+    if (cachedAccessCode && cachedAccessCode !== "DEMO-MODE") {
+        console.log("🔄 [Recuperación] Detectada sesión activa previa. Restaurando estado...");
+        appState.accessCode = cachedAccessCode;
+        appState.participantId = sessionStorage.getItem("participantId") || "ANON";
+        appState.experience = sessionStorage.getItem("experience") || "No declarada";
+        appState.geminiApiKey = sessionStorage.getItem("geminiApiKey") || "";
+        appState.groqApiKey = sessionStorage.getItem("groqApiKey") || "";
+        appState.openrouterApiKey = sessionStorage.getItem("openrouterApiKey") || "";
+        appState.runNumber = parseInt(sessionStorage.getItem("runNumber") || "1", 10);
+        appState.startingGroup = sessionStorage.getItem("startingGroup") || "A";
+        appState.activeGroup = sessionStorage.getItem("activeGroup") || "A";
+        appState.selectedScenarioId = sessionStorage.getItem("selectedScenarioId") || "1";
+        appState.isDemoMode = sessionStorage.getItem("isDemoMode") === "true";
+        
+        try {
+            const savedLogs = sessionStorage.getItem("csvLogs");
+            if (savedLogs) appState.csvLogs = JSON.parse(savedLogs);
+        } catch (e) {
+            console.error("Error al deserializar logs guardados:", e);
+        }
+
+        // Rellenar visualmente los campos en Fase 1 por consistencia
+        document.getElementById("access-code").value = appState.accessCode;
+        document.getElementById("participant-id").value = appState.participantId;
+        document.getElementById("participant-experience").value = appState.experience;
+        document.getElementById("gemini-key").value = appState.geminiApiKey;
+        document.getElementById("groq-key").value = appState.groqApiKey;
+        document.getElementById("openrouter-key").value = appState.openrouterApiKey;
+
+        // Redirigir a la fase en la que se quedó el participante
+        const currentPhase = parseInt(sessionStorage.getItem("currentPhase") || "2", 10);
+        console.log(`🔄 [Recuperación] Enviando al participante a Fase ${currentPhase}`);
+        
+        // Re-inicializar entorno específico de la fase
+        if (currentPhase === 3) {
+            setupScenario(appState.selectedScenarioId);
+            setupExperimentalUI(appState.activeGroup, isProduction);
+            startStopwatch();
+        } else if (currentPhase === 4) {
+            setupQuiz(appState.selectedScenarioId);
+        }
+        
+        showPhase(currentPhase);
+    }
 
     // Botón de generación de alias único
     const generateBtn = document.getElementById("btn-generate-alias");
@@ -374,24 +517,93 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Fase 1 -> Fase 2
-    document.getElementById("btn-to-phase-2").addEventListener("click", () => {
+    // Fase 1 -> Fase 2 (con Validación de Código)
+    document.getElementById("btn-to-phase-2").addEventListener("click", async () => {
         appState.isDemoMode = false;
+        
+        const accessCodeInput = document.getElementById("access-code").value.trim().toUpperCase();
+        if (!accessCodeInput) {
+            alert("Por favor, ingrese su Código de Acceso de un Solo Uso.");
+            return;
+        }
+        
         const idInput = document.getElementById("participant-id").value.trim();
-        appState.participantId = idInput || "ANON";
+        if (!idInput) {
+            alert("Por favor, ingrese o genere su Código de Identificación de Participante (Alias).");
+            return;
+        }
         
         const expSelect = document.getElementById("participant-experience");
         if (!expSelect.value) {
             alert("Por favor, seleccione su nivel de experiencia antes de comenzar.");
             return;
         }
-        appState.experience = expSelect.value;
         
-        appState.geminiApiKey = document.getElementById("gemini-key").value.trim();
-        appState.groqApiKey = document.getElementById("groq-key").value.trim();
-        appState.openrouterApiKey = document.getElementById("openrouter-key").value.trim();
-        showPhase(2);
+        const btnStart = document.getElementById("btn-to-phase-2");
+        const originalText = btnStart.innerHTML;
+        btnStart.disabled = true;
+        btnStart.innerText = "Validando código...";
+        
+        try {
+            if (isFirebaseAvailable && db) {
+                const docRef = db.collection("codigos_acceso").doc(accessCodeInput);
+                const docSnap = await docRef.get();
+                
+                if (!docSnap.exists) {
+                    alert("El código de acceso introducido no es válido. Verifique con el investigador.");
+                    btnStart.disabled = false;
+                    btnStart.innerHTML = originalText;
+                    return;
+                }
+                
+                const data = docSnap.data();
+                if (data.usado === true) {
+                    alert("Este código de acceso ya ha sido utilizado. Si su sesión se interrumpió, solicite un nuevo código al investigador.");
+                    btnStart.disabled = false;
+                    btnStart.innerHTML = originalText;
+                    return;
+                }
+                
+                // Quemar el código
+                await docRef.update({
+                    usado: true,
+                    participante: idInput,
+                    fecha_uso: new Date().toISOString()
+                });
+                console.log(`✓ [Firebase] Código de acceso ${accessCodeInput} validado y quemado con éxito.`);
+            } else {
+                console.warn("⚠️ [Firebase] Omitiendo validación en el servidor por estar fuera de línea.");
+            }
+            
+            // Cargar datos
+            appState.accessCode = accessCodeInput;
+            appState.participantId = idInput;
+            appState.experience = expSelect.value;
+            
+            appState.geminiApiKey = document.getElementById("gemini-key").value.trim();
+            appState.groqApiKey = document.getElementById("groq-key").value.trim();
+            appState.openrouterApiKey = document.getElementById("openrouter-key").value.trim();
+            
+            showPhase(2);
+        } catch (error) {
+            console.error("❌ Error de validación en Firebase:", error);
+            alert(`Error de red al validar el código: ${error.message}. Contacte al investigador.`);
+        } finally {
+            btnStart.disabled = false;
+            btnStart.innerHTML = originalText;
+        }
     });
+
+    // Iniciar corrida asignada automáticamente (Fase 2 -> Fase 3)
+    const startAssignedBtn = document.getElementById("btn-start-assigned-run");
+    if (startAssignedBtn) {
+        startAssignedBtn.addEventListener("click", () => {
+            setupScenario(appState.selectedScenarioId);
+            setupExperimentalUI(appState.activeGroup, isProduction);
+            showPhase(3);
+            startStopwatch();
+        });
+    }
 
     // Modo Demo
     const demoBtn = document.getElementById("btn-demo-mode");
@@ -468,15 +680,22 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadCSV();
     });
 
-    // Reiniciar
+    // Reiniciar / Avanzar Corrida
     document.getElementById("btn-restart").addEventListener("click", () => {
         if (appState.activeGroup === "B" || appState.activeGroup === "C") {
             const selectedRating = document.querySelector('input[name="trust-rating"]:checked');
             if (!selectedRating) {
-                alert("Por favor, seleccione una calificación de confianza en la escala Likert antes de iniciar otra corrida.");
+                alert("Por favor, seleccione una calificación de confianza en la escala Likert antes de continuar.");
                 return;
             }
         }
+        
+        // Si no es modo demo y completó las 3 corridas, bloquear el reinicio
+        if (!appState.isDemoMode && appState.runNumber >= 3) {
+            alert("Ha completado las 3 corridas del experimento. Por favor, descargue su reporte de resultados final (.csv).");
+            return;
+        }
+
         appState.answers = {};
         appState.quizScore = 0;
         appState.iaLatency = 0;
@@ -490,6 +709,16 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("group-b-response-container").classList.add("hidden");
         document.getElementById("group-c-response-container").classList.add("hidden");
         document.getElementById("btn-to-phase-4").disabled = true;
+
+        if (!appState.isDemoMode) {
+            // Avanzar a la siguiente corrida
+            appState.runNumber += 1;
+            
+            // Recalcular parámetros según la matriz de contrabalanceo Latino
+            const { group, scenarioId } = getExperimentParameters(appState.startingGroup, appState.runNumber);
+            appState.activeGroup = group;
+            appState.selectedScenarioId = scenarioId;
+        }
 
         // Mantener el control experimental al reiniciar
         setupExperimentalUI(appState.activeGroup, isProduction);
@@ -761,20 +990,22 @@ async function executeGroupB() {
             throw new Error("No se configuró ninguna clave de API en Fase 1.");
         }
     } catch (e) {
-        console.warn("⚠️ [Resiliencia Offline Grupo B] Activando degradación elegante...", e);
-        const fallbackResponse = MOCK_IA_RESPONSES[appState.selectedScenarioId].groupB;
-        responseText = `⚠️ [Degradación Elegante / Resiliencia Offline]
-Se activó el modo de contingencia local debido a un error de conexión o límite de cuota (${e.message}).
-
-${fallbackResponse}`;
-        appState.lastUsedModel = (appState.lastUsedModel || "Desconocido") + " (Fallback)";
+        console.error("❌ Error de red / API en Grupo B:", e);
+        responseText = `❌ ERROR DE CONEXIÓN A LA API: ${e.message}\n\nEl sistema no pudo recuperar el dictamen de la IA. Por favor, verifique su conexión a internet, espere unos segundos y vuelva a presionar "Consultar IA" para reintentar. No es necesario reiniciar el navegador.`;
+        appState.lastUsedModel = "Error de Conexión";
+        
+        appState.iaLatency = (performance.now() - start) / 1000;
+        textDiv.innerText = responseText;
+        runBtn.disabled = false;
+        document.getElementById("btn-to-phase-4").disabled = true; // Bloquear avance a Fase 4
+        return;
     }
 
     appState.iaLatency = (performance.now() - start) / 1000;
     textDiv.innerText = responseText;
     runBtn.disabled = false;
     
-    // Habilitar avance a cuestionario
+    // Habilitar avance a cuestionario solo si la API tuvo éxito
     document.getElementById("btn-to-phase-4").disabled = false;
 }
 
@@ -863,18 +1094,21 @@ async function executeGroupC() {
             throw new Error(`Código de error HTTP: ${response.status}`);
         }
     } catch (e) {
-        console.warn("⚠️ [Resiliencia Backend] Fallo en la llamada. Activando degradación elegante (Dictamen local)...", e);
-        // Simulador de degradación elegante (Fallback controlado por diseño)
-        data = {
-            evaluacion: "RECHAZADO (FALLBACK)",
-            explicacion: `[Degradación Elegante por Fallo de Servidor: ${e.message}]. Se determinó una inconsistencia de plazos: la decisión de posponer la notificación regulatoria en ${scenario.jurisdiction} incumple los plazos de contingencia.`,
-            mejor_practica: "Se recomienda apegarse de forma irrestricta a los plazos legales de reporte preliminar (3h en Chile, 24h en Uruguay, 72h en México).",
-            fuentes_citadas: ["LOCAL_SHIELD_FALLBACK_HASH_0xff1a", "LOCAL_LAWS_LATAM_HASH_0xab53"],
-            costo_estimado: 0.00000,
-            total_tokens: 0,
-            aprobado: false,
-            score_tecnico: 80.0
-        };
+        console.error("❌ Error de red / backend en Grupo C:", e);
+        
+        // Mostrar mensaje de error claro en pantalla
+        document.getElementById("group-c-verdict").innerHTML = '<span style="color: var(--color-danger);">❌ ERROR DE CONEXIÓN</span>';
+        document.getElementById("group-c-explanation").innerText = `El motor de agentes multi-agente no pudo comunicarse con el servidor remoto debido al siguiente error: ${e.message}. \n\nPor favor, verifique su conexión a internet, espere unos segundos y vuelva a presionar "Consultar Motor" para reintentar.`;
+        document.getElementById("group-c-practices").innerText = "No disponible debido al fallo de conexión.";
+        document.getElementById("group-c-approved").innerText = "Fallo";
+        document.getElementById("group-c-score").innerText = "0%";
+        document.getElementById("group-c-cost").innerText = "$0.00000 USD";
+        document.getElementById("group-c-tokens").innerText = "0 tokens";
+        
+        appState.iaLatency = (performance.now() - start) / 1000;
+        runBtn.disabled = false;
+        document.getElementById("btn-to-phase-4").disabled = true; // Bloquear avance a Fase 4
+        return;
     }
 
     appState.iaLatency = (performance.now() - start) / 1000;
@@ -1110,6 +1344,43 @@ function evaluateQuiz() {
         confianza: "N/A"
     });
 
+    // Ajustar el botón de reinicio / siguiente corrida según la fase del experimento
+    const btnRestart = document.getElementById("btn-restart");
+    let completionMsg = document.getElementById("completion-msg");
+    
+    if (appState.isDemoMode) {
+        btnRestart.innerText = "Evaluar otro Grupo / Escenario";
+        btnRestart.classList.remove("hidden");
+        if (completionMsg) completionMsg.classList.add("hidden");
+    } else {
+        if (appState.runNumber < 3) {
+            btnRestart.innerText = `Continuar a la Corrida ${appState.runNumber + 1} de 3`;
+            btnRestart.classList.remove("hidden");
+            if (completionMsg) completionMsg.classList.add("hidden");
+        } else {
+            btnRestart.classList.add("hidden");
+            
+            const restartContainer = btnRestart.parentElement;
+            if (!completionMsg) {
+                completionMsg = document.createElement("div");
+                completionMsg.id = "completion-msg";
+                completionMsg.style.marginTop = "12px";
+                completionMsg.style.padding = "14px";
+                completionMsg.style.background = "rgba(0,230,118,0.1)";
+                completionMsg.style.border = "1px solid var(--color-success)";
+                completionMsg.style.borderRadius = "8px";
+                completionMsg.style.fontSize = "0.9rem";
+                completionMsg.style.color = "#00e676";
+                completionMsg.style.width = "100%";
+                completionMsg.style.boxSizing = "border-box";
+                completionMsg.innerHTML = "<strong>🎉 ¡Experimento completado con éxito!</strong> Ha completado las 3 corridas del contrabalanceo. Por favor, descargue su archivo CSV final.";
+                restartContainer.appendChild(completionMsg);
+            } else {
+                completionMsg.classList.remove("hidden");
+            }
+        }
+    }
+
     showPhase(5);
 }
 
@@ -1338,10 +1609,14 @@ function setupExperimentalUI(group, isProduction) {
         }
     }
 
-    // 3. Ocultar barra de pestañas (Tabs) en Fase 3 para blindar el experimento
+    // 3. Ocultar barra de pestañas (Tabs) en Fase 3 para blindar el experimento (excepto en modo demo)
     const tabsContainer = document.getElementById("tabs-container");
     if (tabsContainer) {
-        tabsContainer.classList.add("hidden");
+        if (appState.isDemoMode) {
+            tabsContainer.classList.remove("hidden");
+        } else {
+            tabsContainer.classList.add("hidden");
+        }
     }
 
     // 4. Mostrar únicamente el panel correspondiente al grupo activo

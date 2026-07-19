@@ -50,3 +50,22 @@ Su propósito es servir como puente conceptual entre la **ingeniería de intelig
 *   **Qué:** El desacoplamiento de tareas cognitivas asignando el procesamiento rápido a modelos de bajo costo (Groq/Llama-3.3-70B) y la validación cruzada a modelos de razonamiento (DeepSeek R1/V4). Se incorporó la cascada de fallbacks de **OpenRouter** de pago y el balanceo A/B geopolítico en el cliente.
 *   **Por qué:** Para estudiar con rigor el sesgo geopolítico (Meta Llama 3.3 vs DeepSeek V4 Flash) y evitar cuellos de botella por cuotas gratuitas (errores 429/401). OpenRouter permite enrutar al proveedor más barato disponible (como DeepInfra) con una sola línea de código.
 *   **Para qué:** Para blindar la estabilidad del backend ante agotamiento de cuotas y asegurar un score de precisión óptimo, así como capturar datos empíricos robustos sobre el impacto del origen geográfico del modelo de IA en el análisis legal.
+
+---
+
+## 4. Decisiones de Control Metodológico y Seguridad (Adiciones de Fase 2 de Desarrollo)
+
+### 4.1 Control de Acceso Mediante Tokens de Un Solo Uso (Cloud Firestore)
+*   **Qué:** La implementación de una barrera de control de acceso basada en un código de acceso único en la Fase 1, validado y consumido (marcado como `usado: true` junto con el alias del participante y la fecha) mediante una consulta atómica a Cloud Firestore.
+*   **Por qué:** Debido a que el arnés está publicado en la web (como requisito de acceso público), existe el riesgo de que personas ajenas a la muestra ingresen al arnés y consuman las cuotas de API de IA contratadas o contaminen la base de datos de logs del experimento.
+*   **Para qué:** Para blindar el acceso al experimento y asegurar de forma estricta que solo los sujetos pertenecientes a la muestra controlada de la investigación puedan realizar la evaluación y consumir las cuotas de API de Gemini, Groq y OpenRouter.
+
+### 4.2 Automatización del Contrabalanceo Latino Multicorrida sin Fuga de Estado
+*   **Qué:** La sustitución de la selección manual de escenarios en la Fase 2 por una asignación automatizada ciega en base a la matriz de contrabalanceo de Cuadrado Latino (Grupo/Escenario por Corrida 1, 2 y 3) de forma secuencial y sin recargar la página.
+*   **Por qué:** En el diseño intrasujeto, es fundamental que el orden de exposición a las condiciones tecnológicas y de escenarios esté perfectamente alternado para evitar sesgos acumulativos. Permitir al usuario elegir de forma manual arruina el contrabalanceo y la validez estadística. Además, mantener el avance continuo (Corrida 1 -> Corrida 2 -> Corrida 3) mantiene al sujeto en foco técnico sin forzarlo a volver a iniciar sesión.
+*   **Para qué:** Para garantizar la rigurosidad científica en la recolección de métricas de precisión y latencia, permitiendo al participante realizar las 3 corridas de manera continuada y descargar al final un reporte CSV unificado con el rendimiento completo de su sesión.
+
+### 4.3 Tolerancia a Fallas en Caliente (sessionStorage) y Gestión Estricta de Errores de API
+*   **Qué:** La serialización continua del estado actual del experimento en el `sessionStorage` del navegador y la eliminación absoluta de los "fallbacks" o modos de resiliencia con respuestas de IA simuladas (locales) ante errores de red.
+*   **Por qué:** Si se produce un fallo de red o latencia en el servidor remoto, el arnés debe mostrar el error real de conexión y permitir reintentos ilimitados en la misma pantalla para capturar la métrica real (pureza de las variables dependientes), en lugar de falsear el resultado inyectando silenciosamente un texto simulado. Por otro lado, si el usuario refresca la página (F5) para solucionar una latencia de red, perdería sus logs y su código de acceso único quedaría inutilizable.
+*   **Para qué:** Para salvaguardar la precisión y validez científica de los datos del experimento (sin falsear tiempos de respuesta de IA) y proveer tolerancia a fallos del navegador a través de la restauración transparente de la sesión de progreso (impidiendo el bloqueo del código de acceso).

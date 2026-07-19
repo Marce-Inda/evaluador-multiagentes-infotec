@@ -52,9 +52,16 @@
                     </div>
                 </div>
 
-                <!-- Paso 1: ID del Participante -->
+                <!-- Paso 1: Código de Acceso de un Solo Uso -->
                 <div class="form-group">
-                    <label for="participant-id">Paso 1: Código de Identificación del Participante</label>
+                    <label for="access-code">Paso 1: Código de Acceso de un Solo Uso</label>
+                    <input type="text" id="access-code" placeholder="Ej. INFOTEC-T1-XYZ" required style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); font-family: inherit; font-size: 0.95rem; outline: none; box-sizing: border-box;">
+                    <span class="helper-text">Introduzca el código único proporcionado por el investigador para habilitar el uso de los modelos.</span>
+                </div>
+
+                <!-- Paso 2: ID del Participante -->
+                <div class="form-group">
+                    <label for="participant-id">Paso 2: Código de Identificación del Participante (Alias)</label>
                     <div style="display: flex; gap: 10px; width: 100%;">
                         <input type="text" id="participant-id" placeholder="Ej. CISO-4X8B" required style="flex-grow: 1;">
                         <button type="button" id="btn-generate-alias" class="btn btn-secondary" style="padding: 12px 20px; font-size: 0.85rem; flex-shrink: 0; white-space: nowrap;">
@@ -64,9 +71,9 @@
                     <span class="helper-text">Se prohíbe el uso de nombres reales o corporativos. Presione "Generar Alias" para obtener un código de anonimato único.</span>
                 </div>
 
-                <!-- Paso 2: Experiencia Previa (Variable de Control) -->
+                <!-- Paso 3: Experiencia Previa (Variable de Control) -->
                 <div class="form-group">
-                    <label for="participant-experience">Paso 2: Experiencia previa en Ciberseguridad, Derecho o TICs</label>
+                    <label for="participant-experience">Paso 3: Experiencia previa en Ciberseguridad, Derecho o TICs</label>
                     <select id="participant-experience" required style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); font-family: inherit; font-size: 0.95rem; outline: none;">
                         <option value="" disabled selected style="background: #111;">Seleccione su nivel de experiencia...</option>
                         <option value="Principiante" style="background: #111;">&lt; 1 año (Principiante / Estudiante)</option>
@@ -77,9 +84,9 @@
                     <span class="helper-text">Esta variable de control permite clasificar el perfil técnico del participante de forma agregada.</span>
                 </div>
 
-                <!-- Paso 3: Credenciales (Solo para el Grupo B, se oculta programáticamente para los demás) -->
+                <!-- Paso 4: Credenciales (Solo para el Grupo B, se oculta programáticamente para los demás) -->
                 <div id="credentials-container" class="form-group hidden">
-                    <label>Paso 3: Clave de Acceso para el Asistente IA (Proporcionada por el investigador)</label>
+                    <label>Paso 4: Clave de Acceso para el Asistente IA (Proporcionada por el investigador)</label>
                     <div class="form-group-row">
                         <div class="form-group">
                             <label for="gemini-key" style="font-size: 0.8rem; color: var(--text-muted);">Clave Google Gemini API</label>
@@ -118,7 +125,32 @@
                 <p>Seleccione el escenario regulatorio transfronterizo que auditará como CISO de la organización.</p>
             </div>
             <div class="card-body">
-                <div class="scenarios-grid">
+                <!-- Contenedor Automático (Producción / Experimento Controlado) -->
+                <div id="assigned-run-container" class="hidden" style="text-align: center; padding: 20px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; max-width: 600px; margin: 0 auto;">
+                    <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--badge-health); font-weight: 600; margin-bottom: 12px;" id="assigned-run-subtitle">CORRIDA X DE 3</div>
+                    <h3 id="assigned-run-title" style="margin: 0 0 16px 0; font-size: 1.5rem; color: #fff;">Escenario de Crisis</h3>
+                    
+                    <div class="info-alert" style="margin-bottom: 20px; text-align: left; background: rgba(255,255,255,0.03);">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: var(--badge-health); flex-shrink: 0; margin-right: 12px;">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <div>
+                            <strong>Detalles de la Corrida:</strong><br>
+                            <span id="assigned-run-details">Cargando detalles de asignación...</span>
+                        </div>
+                    </div>
+                    
+                    <button id="btn-start-assigned-run" class="btn btn-primary btn-lg" style="width: 100%;">
+                        Comenzar Corrida
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; margin-left: 8px; display: inline-block; vertical-align: middle;">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Contenedor Manual / Selección Libre (Demo o desarrollo) -->
+                <div id="manual-scenarios-container" class="scenarios-grid">
                     <!-- Escenario 1 -->
                     <div class="scenario-option" data-id="1">
                         <div class="scenario-badge finances">FINANZAS</div>
@@ -433,6 +465,10 @@
             </div>
         </div>
     </div>
+
+    <!-- Firebase Compat SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
     <!-- Scripts de la Aplicación -->
     <script src="app.js"></script>
