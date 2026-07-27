@@ -678,7 +678,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     let urlGroup = urlParams.get('group');
     const isProduction = urlParams.get('production') === 'true';
+    const isDemoExplicit = urlParams.get('demo') === 'true';
     appState.isProduction = isProduction;
+    appState.isDemoExplicit = isDemoExplicit;
 
     // Normalizar grupo
     if (urlGroup) {
@@ -747,13 +749,13 @@ document.addEventListener("DOMContentLoaded", () => {
         showPhase(currentPhase);
     }
 
-    // El botón Modo Demo está habilitado por defecto para entorno local / investigación
+    // El botón Modo Demo solo se muestra si explícitamente se pasa ?demo=true en la URL
     const btnDemo = document.getElementById("btn-demo-mode");
     if (btnDemo) {
-        if (isProduction) {
-            btnDemo.classList.add("hidden");
-        } else {
+        if (isDemoExplicit) {
             btnDemo.classList.remove("hidden");
+        } else {
+            btnDemo.classList.add("hidden");
         }
     }
 
@@ -1991,13 +1993,13 @@ async function runAutoplay(targetPhase) {
 
 // Configuración de interfaz según el grupo activo y el modo producción (Control Ciego Único)
 function setupExperimentalUI(group, isProduction) {
-    // 1. Ocultar Modo Demo si es producción
+    // 1. Ocultar Modo Demo siempre, salvo que se pase ?demo=true explícitamente en la URL
     const demoBtn = document.getElementById("btn-demo-mode");
     if (demoBtn) {
-        if (isProduction) {
-            demoBtn.classList.add("hidden");
-        } else {
+        if (appState.isDemoExplicit) {
             demoBtn.classList.remove("hidden");
+        } else {
+            demoBtn.classList.add("hidden");
         }
     }
 
