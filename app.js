@@ -1349,17 +1349,18 @@ async function executeGroupB() {
             responseText = resData.choices?.[0]?.message?.content || "";
             if (!responseText) throw new Error("Respuesta vacía o malformada de OpenRouter.");
         } else {
-            // Degradación Elegante por defecto (Mock IA) si no se ingresaron claves
-            console.log("ℹ️ [Degradación Elegante] Usando dictamen precargado para el experimento.");
-            appState.lastUsedModel = "Dictamen de Resguardo (Simulado)";
-            const mockData = MOCK_IA_RESPONSES[appState.selectedScenarioId];
-            responseText = mockData ? mockData.groupB : "Dictamen preliminar no disponible.";
+            throw new Error("No se ha configurado la clave de API requerida para esta sesión.");
         }
     } catch (e) {
-        console.warn("⚠️ Fallo en la llamada a la API en vivo, activando respuesta de resguardo (Mock IA):", e);
-        appState.lastUsedModel = "Dictamen de Resguardo (Fallback)";
-        const mockData = MOCK_IA_RESPONSES[appState.selectedScenarioId];
-        responseText = mockData ? mockData.groupB : `❌ ERROR DE CONEXIÓN A LA API: ${e.message}`;
+        console.error("❌ Error de red / API en Grupo B:", e);
+        responseText = `❌ ERROR DE CONEXIÓN A LA API: ${e.message}\n\nEl sistema no pudo recuperar el dictamen de la IA en vivo. Por favor, contacte al equipo de investigación para solicitar un nuevo código de acceso.`;
+        appState.lastUsedModel = "Error de Conexión / API";
+        
+        appState.iaLatency = (performance.now() - start) / 1000;
+        textDiv.innerText = responseText;
+        runBtn.disabled = false;
+        document.getElementById("btn-to-phase-4").disabled = true; // Bloquear avance
+        return;
     }
 
     appState.iaLatency = (performance.now() - start) / 1000;
@@ -1435,8 +1436,16 @@ async function executeGroupC() {
             throw new Error(`Código de error HTTP: ${response.status}`);
         }
     } catch (e) {
-        console.warn("⚠️ Fallo de conexión en backend remoto Grupo C, aplicando degradación elegante:", e);
-        data = MOCK_IA_RESPONSES[appState.selectedScenarioId].groupC;
+        console.error("❌ Error de red / backend en Grupo C:", e);
+        
+        document.getElementById("group-c-verdict").innerHTML = '<span style="color: var(--color-danger);">❌ ERROR DE CONEXIÓN A LA API</span>';
+        document.getElementById("group-c-explanation").innerText = `El sistema no pudo recuperar el dictamen de la IA en vivo debido a un error de conexión (${e.message}). Por favor, contacte al equipo de investigación para solicitar un nuevo código de acceso.`;
+        document.getElementById("group-c-practices").innerText = "No disponible.";
+        
+        appState.iaLatency = (performance.now() - start) / 1000;
+        runBtn.disabled = false;
+        document.getElementById("btn-to-phase-4").disabled = true; // Bloquear avance
+        return;
     }
 
     appState.iaLatency = (performance.now() - start) / 1000;
