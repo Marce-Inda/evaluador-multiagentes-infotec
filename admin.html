@@ -531,12 +531,15 @@
                     const perfilAsignado = c.perfil_asignado || c.perfil || "CISO";
                     actionCell = `
                         <div style="margin-bottom:4px;"><small style="color:var(--text-muted);">Rol: <strong>${escapeHtml(perfilAsignado)}</strong></small></div>
-                        <span class="code-box" onclick="copyCodeText('${c.codigo_generado}')" title="Haga clic para copiar">
-                            ${c.codigo_generado}
-                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
-                            </svg>
-                        </span>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <span class="code-box" onclick="copyCodeText('${c.codigo_generado}')" title="Haga clic para copiar">
+                                ${c.codigo_generado}
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
+                                </svg>
+                            </span>
+                            <button class="btn-action" style="background:rgba(255,255,255,0.08); color:var(--primary); border:1px solid rgba(0,188,255,0.3); font-size:0.75rem; padding:4px 8px; border-radius:6px; cursor:pointer;" onclick="approveCandidate('${c.id}', '${perfilAsignado}')">🔄 Regenerar Código</button>
+                        </div>
                     `;
                 } else {
                     actionCell = `<span style="color: var(--text-muted);">Rechazado</span>`;
