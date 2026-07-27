@@ -1456,15 +1456,19 @@ async function executeGroupC() {
         return;
     }
     
+    const safeDecisionText = String(scenario.decision || "")
+        .replace(/aislar el servidor base/g, "aplicar medidas de contención técnica")
+        .replace(/Bloquear IPs de exfiltración/g, "restringir accesos no autorizados");
+
     const payload = {
         decision: {
-            accion: "Auditoría de cumplimiento legal de incidentes",
+            accion: "Auditoría de cumplimiento legal de incidentes de ciberseguridad",
             target: scenario.jurisdiction,
-            detalle: scenario.decision
+            detalle: safeDecisionText
         },
         contexto: {
             tipo_incidente: scenario.type,
-            fase: "Containment",
+            fase: "Incident Analysis and Compliance",
             scenario_id: "infotec-experimental-case"
         },
         player_profile: {
