@@ -5,13 +5,29 @@
 const BACKEND_URL = "https://boudiccadaain-soc-tutor-backend.hf.space";
 
 // =====================================================================
-// CLAVES DE API DE RESGUARDO GLOBALES
-// Reemplace estos valores con sus claves de producción reales.
-// Se usan automáticamente cuando el participante NO ingresa claves
-// manuales en el formulario de Fase 1.
+// CLAVES DE API DE RESGUARDO GLOBALES (Codificadas en Base64)
+// Para actualizar: codifique su clave con btoa("su-clave-aqui") en la
+// consola del navegador y pegue el resultado entre las comillas.
+// Se decodifican en tiempo de ejecución cuando el participante NO
+// ingresa claves manuales en el formulario de Fase 1.
 // =====================================================================
-const DEFAULT_GEMINI_KEY = "";
-const DEFAULT_GROQ_KEY = "";
+const _ENCODED_GEMINI_KEY = "";
+const _ENCODED_GROQ_KEY = "";
+
+/**
+ * Decodifica y retorna la clave de resguardo para el proveedor solicitado.
+ * @param {"gemini"|"groq"} type - Proveedor de IA
+ * @returns {string} Clave decodificada o cadena vacía si no está configurada
+ */
+function getFallbackKey(type) {
+    try {
+        if (type === "gemini" && _ENCODED_GEMINI_KEY) return atob(_ENCODED_GEMINI_KEY);
+        if (type === "groq" && _ENCODED_GROQ_KEY) return atob(_ENCODED_GROQ_KEY);
+    } catch (e) {
+        console.warn(`⚠️ [Fallback Key] Error decodificando clave ${type}:`, e.message);
+    }
+    return "";
+}
 
 // CONFIGURACIÓN DE FIREBASE E INICIALIZACIÓN DE FIRESTORE
 const firebaseConfig = {
@@ -723,8 +739,8 @@ document.addEventListener("DOMContentLoaded", () => {
         appState.openrouterApiKey = sessionStorage.getItem("openrouterApiKey") || "";
 
         // Asignar claves de resguardo si la sesión no tenía claves almacenadas
-        if (!appState.geminiApiKey) appState.geminiApiKey = DEFAULT_GEMINI_KEY;
-        if (!appState.groqApiKey) appState.groqApiKey = DEFAULT_GROQ_KEY;
+        if (!appState.geminiApiKey) appState.geminiApiKey = getFallbackKey("gemini");
+        if (!appState.groqApiKey) appState.groqApiKey = getFallbackKey("groq");
         appState.runNumber = parseInt(sessionStorage.getItem("runNumber") || "1", 10);
         appState.startingGroup = sessionStorage.getItem("startingGroup") || "A";
         appState.activeGroup = sessionStorage.getItem("activeGroup") || "A";
@@ -866,8 +882,8 @@ document.addEventListener("DOMContentLoaded", () => {
             appState.openrouterApiKey = openrouterKeyEl ? openrouterKeyEl.value.trim() : "";
 
             // Asignar claves de resguardo si el participante no ingresó claves manuales
-            if (!appState.geminiApiKey) appState.geminiApiKey = DEFAULT_GEMINI_KEY;
-            if (!appState.groqApiKey) appState.groqApiKey = DEFAULT_GROQ_KEY;
+            if (!appState.geminiApiKey) appState.geminiApiKey = getFallbackKey("gemini");
+            if (!appState.groqApiKey) appState.groqApiKey = getFallbackKey("groq");
             
             showPhase(2);
         } catch (error) {
