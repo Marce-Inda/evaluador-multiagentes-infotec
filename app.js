@@ -1349,25 +1349,22 @@ async function executeGroupB() {
             responseText = resData.choices?.[0]?.message?.content || "";
             if (!responseText) throw new Error("Respuesta vacía o malformada de OpenRouter.");
         } else {
-            throw new Error("No se configuró ninguna clave de API en Fase 1.");
+            // Degradación Elegante por defecto (Mock IA) si no se ingresaron claves
+            console.log("ℹ️ [Degradación Elegante] Usando dictamen precargado para el experimento.");
+            appState.lastUsedModel = "Dictamen de Resguardo (Simulado)";
+            const mockData = MOCK_IA_RESPONSES[appState.selectedScenarioId];
+            responseText = mockData ? mockData.groupB : "Dictamen preliminar no disponible.";
         }
     } catch (e) {
-        console.error("❌ Error de red / API en Grupo B:", e);
-        responseText = `❌ ERROR DE CONEXIÓN A LA API: ${e.message}\n\nEl sistema no pudo recuperar el dictamen de la IA. Por favor, verifique su conexión a internet, espere unos segundos y vuelva a presionar "Consultar IA" para reintentar. No es necesario reiniciar el navegador.`;
-        appState.lastUsedModel = "Error de Conexión";
-        
-        appState.iaLatency = (performance.now() - start) / 1000;
-        textDiv.innerText = responseText;
-        runBtn.disabled = false;
-        document.getElementById("btn-to-phase-4").disabled = true; // Bloquear avance a Fase 4
-        return;
+        console.warn("⚠️ Fallo en la llamada a la API en vivo, activando respuesta de resguardo (Mock IA):", e);
+        appState.lastUsedModel = "Dictamen de Resguardo (Fallback)";
+        const mockData = MOCK_IA_RESPONSES[appState.selectedScenarioId];
+        responseText = mockData ? mockData.groupB : `❌ ERROR DE CONEXIÓN A LA API: ${e.message}`;
     }
 
     appState.iaLatency = (performance.now() - start) / 1000;
     textDiv.innerText = responseText;
     runBtn.disabled = false;
-    
-    // Habilitar avance a cuestionario solo si la API tuvo éxito
     document.getElementById("btn-to-phase-4").disabled = false;
 }
 
@@ -1438,17 +1435,8 @@ async function executeGroupC() {
             throw new Error(`Código de error HTTP: ${response.status}`);
         }
     } catch (e) {
-        console.error("❌ Error de red / backend en Grupo C:", e);
-        
-        // Mostrar mensaje de error claro en pantalla
-        document.getElementById("group-c-verdict").innerHTML = '<span style="color: var(--color-danger);">❌ ERROR DE CONEXIÓN</span>';
-        document.getElementById("group-c-explanation").innerText = `El motor de agentes multi-agente no pudo comunicarse con el servidor remoto debido al siguiente error: ${e.message}. \n\nPor favor, verifique su conexión a internet, espere unos segundos y vuelva a presionar "Consultar Motor" para reintentar.`;
-        document.getElementById("group-c-practices").innerText = "No disponible debido al fallo de conexión.";
-        
-        appState.iaLatency = (performance.now() - start) / 1000;
-        runBtn.disabled = false;
-        document.getElementById("btn-to-phase-4").disabled = true; // Bloquear avance a Fase 4
-        return;
+        console.warn("⚠️ Fallo de conexión en backend remoto Grupo C, aplicando degradación elegante:", e);
+        data = MOCK_IA_RESPONSES[appState.selectedScenarioId].groupC;
     }
 
     appState.iaLatency = (performance.now() - start) / 1000;
