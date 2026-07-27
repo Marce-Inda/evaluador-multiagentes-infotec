@@ -4,6 +4,15 @@
    ========================================================================== */
 const BACKEND_URL = "https://boudiccadaain-soc-tutor-backend.hf.space";
 
+// =====================================================================
+// CLAVES DE API DE RESGUARDO GLOBALES
+// Reemplace estos valores con sus claves de producción reales.
+// Se usan automáticamente cuando el participante NO ingresa claves
+// manuales en el formulario de Fase 1.
+// =====================================================================
+const DEFAULT_GEMINI_KEY = "";
+const DEFAULT_GROQ_KEY = "";
+
 // CONFIGURACIÓN DE FIREBASE E INICIALIZACIÓN DE FIRESTORE
 const firebaseConfig = {
     projectId: "the-responder-264f2",
@@ -712,6 +721,10 @@ document.addEventListener("DOMContentLoaded", () => {
         appState.geminiApiKey = sessionStorage.getItem("geminiApiKey") || "";
         appState.groqApiKey = sessionStorage.getItem("groqApiKey") || "";
         appState.openrouterApiKey = sessionStorage.getItem("openrouterApiKey") || "";
+
+        // Asignar claves de resguardo si la sesión no tenía claves almacenadas
+        if (!appState.geminiApiKey) appState.geminiApiKey = DEFAULT_GEMINI_KEY;
+        if (!appState.groqApiKey) appState.groqApiKey = DEFAULT_GROQ_KEY;
         appState.runNumber = parseInt(sessionStorage.getItem("runNumber") || "1", 10);
         appState.startingGroup = sessionStorage.getItem("startingGroup") || "A";
         appState.activeGroup = sessionStorage.getItem("activeGroup") || "A";
@@ -851,6 +864,10 @@ document.addEventListener("DOMContentLoaded", () => {
             appState.geminiApiKey = geminiKeyEl ? geminiKeyEl.value.trim() : "";
             appState.groqApiKey = groqKeyEl ? groqKeyEl.value.trim() : "";
             appState.openrouterApiKey = openrouterKeyEl ? openrouterKeyEl.value.trim() : "";
+
+            // Asignar claves de resguardo si el participante no ingresó claves manuales
+            if (!appState.geminiApiKey) appState.geminiApiKey = DEFAULT_GEMINI_KEY;
+            if (!appState.groqApiKey) appState.groqApiKey = DEFAULT_GROQ_KEY;
             
             showPhase(2);
         } catch (error) {
@@ -1248,7 +1265,13 @@ async function executeGroupB() {
     }
 
     try {
+        // ESTRATEGIA DE CONMUTACIÓN: Gemini (primario) → Groq (secundario) → Error formal
+        let geminiAttempted = false;
+        let geminiError = null;
+
+        // --- INTENTO 1: Gemini (gemini-1.5-flash) ---
         if (appState.geminiApiKey) {
+            geminiAttempted = true;
             appState.lastUsedModel = "gemini-1.5-flash";
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${appState.geminiApiKey}`;
             const payload = {
@@ -1264,6 +1287,8 @@ async function executeGroupB() {
                 if (!response.ok) {
                     if (response.status === 429) {
                         throw new Error("Límite de peticiones excedido (429 Rate Limit) en Google Gemini.");
+                    } else if (response.status === 401) {
+                        throw new Error("Autenticación fallida (401 Unauthorized) en Google Gemini.");
                     } else if (response.status === 400) {
                         throw new Error("Petición incorrecta (400 Bad Request) en Gemini.");
                     } else {
@@ -1273,11 +1298,14 @@ async function executeGroupB() {
                 const resData = await response.json();
                 responseText = resData.candidates?.[0]?.content?.parts?.[0]?.text || "";
                 if (!responseText) throw new Error("Respuesta vacía o malformada de Gemini.");
-            } catch (geminiError) {
-                // Conmutación en caliente a OpenRouter de pago
-                responseText = await callOpenRouterFallback(geminiError.message);
+            } catch (e) {
+                geminiError = e;
+                console.warn(`⚠️ [Grupo B] Gemini falló: ${e.message}. Conmutando a Groq...`);
             }
-        } else if (appState.groqApiKey) {
+        }
+
+        // --- INTENTO 2: Groq (llama-3.3-70b-versatile) — solo si Gemini falló o no estaba configurado ---
+        if (!responseText && appState.groqApiKey) {
             appState.lastUsedModel = "llama-3.3-70b-versatile";
             const url = "https://api.groq.com/openai/v1/chat/completions";
             const payload = {
@@ -1307,11 +1335,18 @@ async function executeGroupB() {
                 responseText = resData.choices?.[0]?.message?.content || "";
                 if (!responseText) throw new Error("Respuesta vacía o malformada de Groq.");
             } catch (groqError) {
-                // Conmutación en caliente a OpenRouter de pago
-                responseText = await callOpenRouterFallback(groqError.message);
+                console.warn(`⚠️ [Grupo B] Groq también falló: ${groqError.message}.`);
+                // Si hay OpenRouter disponible, intentar como último recurso
+                if (appState.openrouterApiKey) {
+                    responseText = await callOpenRouterFallback(groqError.message);
+                } else {
+                    throw new Error(`Gemini: ${geminiError ? geminiError.message : 'No configurado'}. Groq: ${groqError.message}. Ambos proveedores fallaron.`);
+                }
             }
-        } else if (appState.openrouterApiKey) {
-            // No se configuró clave gratuita primaria, usar OpenRouter de pago directamente
+        }
+
+        // --- INTENTO 3: OpenRouter directo (solo si no hay respuesta aún y existe clave) ---
+        if (!responseText && appState.openrouterApiKey) {
             const charCodeSum = appState.participantId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const isWestern = charCodeSum % 2 === 0;
             const model = isWestern ? "meta-llama/llama-3.3-70b-instruct" : "deepseek/deepseek-v4-flash";
@@ -1348,12 +1383,15 @@ async function executeGroupB() {
             const resData = await response.json();
             responseText = resData.choices?.[0]?.message?.content || "";
             if (!responseText) throw new Error("Respuesta vacía o malformada de OpenRouter.");
-        } else {
-            throw new Error("No se ha configurado la clave de API requerida para esta sesión.");
+        }
+
+        // --- Sin respuesta de ningún proveedor ---
+        if (!responseText) {
+            throw new Error("No se pudo obtener respuesta de ningún proveedor de IA configurado.");
         }
     } catch (e) {
         console.error("❌ Error de red / API en Grupo B:", e);
-        responseText = `❌ ERROR DE CONEXIÓN A LA API: ${e.message}\n\nEl sistema no pudo recuperar el dictamen de la IA en vivo. Por favor, contacte al equipo de investigación para solicitar un nuevo código de acceso.`;
+        responseText = `❌ ERROR DE CONEXIÓN A LA API: ${e.message}\n\nEl sistema no pudo recuperar el dictamen de la IA en vivo.\n\nPor favor, contacte al equipo de investigación para solicitar un nuevo código de acceso.\nCorreo: investigador@infotec.edu.mx`;
         appState.lastUsedModel = "Error de Conexión / API";
         
         appState.iaLatency = (performance.now() - start) / 1000;
