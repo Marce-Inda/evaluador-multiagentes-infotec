@@ -22,3 +22,6 @@ chromadb/
 .env.*.local
 *.pem
 *.key
+
+# Archivos de notas privadas del investigador
+GUIA-INVESTIGADOR-NOTAS-PRIVADAS.md

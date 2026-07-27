@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Investigador - The Responder 2.0</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #00bcff;
+            --secondary: #b55dff;
+            --success: #00e676;
+            --danger: #ff4a4a;
+            --warning: #ffd600;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 10% 20%, rgba(0, 188, 255, 0.08) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(181, 93, 255, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* LOGIN CARD */
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 45px;
+            max-width: 450px;
+            width: 100%;
+            margin: 0 auto;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .login-card h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .login-card p {
+            margin: 0 0 24px 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 14px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 188, 255, 0.15);
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 188, 255, 0.2);
+            width: 100%;
+            padding: 12px;
+            font-weight: 600;
+            margin-top: 16px;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        /* MAIN DASHBOARD */
+        .dashboard {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00bcff, #b55dff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            margin: 4px 0 0 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: #0b0f19;
+            border-color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* CANDIDATES TABLE */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.92rem;
+        }
+
+        th {
+            border-bottom: 2px solid var(--border-color);
+            padding: 12px 16px;
+            color: #d1d5db;
+            font-weight: 600;
+        }
+
+        td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px;
+            color: var(--text-main);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-ciso { background: rgba(0, 188, 255, 0.15); color: var(--primary); }
+        .badge-law { background: rgba(181, 93, 255, 0.15); color: var(--secondary); }
+        
+        .badge-pending { background: rgba(255, 214, 0, 0.15); color: var(--warning); }
+        .badge-approved { background: rgba(0, 230, 118, 0.15); color: var(--success); }
+        .badge-rejected { background: rgba(255, 74, 74, 0.15); color: var(--danger); }
+
+        .btn-action {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-approve { background: var(--success); color: #0b0f19; }
+        .btn-approve:hover { opacity: 0.9; }
+        .btn-reject { background: var(--danger); color: #fff; }
+        .btn-reject:hover { opacity: 0.9; }
+
+        .code-box {
+            font-family: monospace;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            color: var(--success);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .code-box:hover {
+            background: rgba(0, 230, 118, 0.1);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal {
+            background: #111827;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+
+        .modal h3 {
+            margin: 0 0 12px 0;
+            color: #fff;
+        }
+
+        .modal p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0 0 20px 0;
+            line-height: 1.5;
+        }
+
+        .generated-code {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--success);
+            background: rgba(0, 230, 118, 0.08);
+            border: 2px dashed var(--success);
+            padding: 14px;
+            border-radius: 8px;
+            letter-spacing: 0.05em;
+            margin-bottom: 24px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="login-container" class="login-card">
+        <h2>Consola del Investigador</h2>
+        <p>Estudio de Toma de Decisiones y Soporte de IA en Incidentes Críticos (INFOTEC 2026)</p>
+        <div class="form-group">
+            <input type="password" id="admin-password" class="form-control" placeholder="Ingrese la Clave de Administrador" required>
+        </div>
+        <button class="btn btn-primary" id="btn-login">Ingresar al Panel</button>
+    </div>
+
+    <!-- MAIN PANEL -->
+    <div id="dashboard-container" class="container hidden">
+        <div class="dashboard">
+            <header>
+                <div>
+                    <h1>Panel de Control de Reclutamiento</h1>
+                    <p>Revisa solicitudes y asigna códigos de acceso para participantes</p>
+                </div>
+                <div>
+                    <button class="btn" onclick="logout()">Cerrar Sesión</button>
+                </div>
+            </header>
+
+            <!-- TABS -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('Pendiente', this)">Pendientes (<span id="count-pending">0</span>)</button>
+                <button class="tab" onclick="switchTab('Aprobado', this)">Aprobados (<span id="count-approved">0</span>)</button>
+                <button class="tab" onclick="switchTab('Rechazado', this)">Rechazados (<span id="count-rejected">0</span>)</button>
+            </div>
+
+            <!-- TABLE -->
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Perfil / Exp</th>
+                            <th>Organización</th>
+                            <th>Motivación</th>
+                            <th>Acciones / Código</th>
+                        </tr>
+                    </thead>
+                    <tbody id="candidates-body">
+                        <tr>
+                            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">Cargando solicitudes de Firebase...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- CODE GENERATED MODAL -->
+    <div id="code-modal" class="modal-overlay hidden">
+        <div class="modal">
+            <h3>¡Código de Acceso Generado!</h3>
+            <p>Copia el código a continuación y envíaselo por correo electrónico al participante para que pueda iniciar sesión en el evaluador experimental.</p>
+            <div class="generated-code" id="modal-code-display" title="Click para copiar" onclick="copyModalCode()">
+                INFOTEC-XXXXX
+            </div>
+            <button class="btn btn-primary" style="margin-top:0;" onclick="closeModal()">Cerrar y Continuar</button>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PIN = "INFOTEC-ADMIN-2026"; // Clave del panel
+        
+        // CONFIGURACIÓN DE FIREBASE
+        const firebaseConfig = {
+            projectId: "the-responder-264f2",
+            appId: "1:717129732306:web:8393356d38f7735eeddd0b",
+            storageBucket: "the-responder-264f2.firebasestorage.app",
+            apiKey: "AIzaSyAy_bIBJelfHcMBx2QHr_hwtWjAa3_LKX0",
+            authDomain: "the-responder-264f2.firebaseapp.com",
+            messagingSenderId: "717129732306",
+            measurementId: "G-XWHLRRVZ68"
+        };
+
+        let db = null;
+        let allCandidates = [];
+        let currentStatusFilter = "Pendiente";
+
+        // Inicializar Firebase
+        if (typeof firebase !== "undefined") {
+            const firebaseApp = firebase.initializeApp(firebaseConfig);
+            db = firebaseApp.firestore();
+        }
+
+        // Login Handler
+        document.getElementById('btn-login').addEventListener('click', handleLogin);
+        document.getElementById('admin-password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        function handleLogin() {
+            const pwd = document.getElementById('admin-password').value.trim();
+            if (pwd === ADMIN_PIN) {
+                sessionStorage.setItem("adminLoggedIn", "true");
+                showDashboard();
+            } else {
+                alert("Clave de administrador incorrecta.");
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem("adminLoggedIn");
+            document.getElementById('dashboard-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+            document.getElementById('admin-password').value = "";
+        }
+
+        // Verificar sesión al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem("adminLoggedIn") === "true") {
+                showDashboard();
+            }
+        });
+
+        function showDashboard() {
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('dashboard-container').classList.remove('hidden');
+            listenToCandidates();
+        }
+
+        // Escucha en tiempo real de Firestore
+        function listenToCandidates() {
+            if (!db) return;
+            
+            db.collection("solicitudes_convocatoria")
+              .orderBy("fecha_registro", "desc")
+              .onSnapshot((snapshot) => {
+                  allCandidates = [];
+                  snapshot.forEach((doc) => {
+                      allCandidates.push({ id: doc.id, ...doc.data() });
+                  });
+                  updateCounts();
+                  renderCandidates();
+              }, (error) => {
+                  console.error("Error al escuchar candidatos:", error);
+              });
+        }
+
+        function updateCounts() {
+            const pending = allCandidates.filter(c => c.estado === "Pendiente").length;
+            const approved = allCandidates.filter(c => c.estado === "Aprobado").length;
+            const rejected = allCandidates.filter(c => c.estado === "Rechazado").length;
+
+            document.getElementById('count-pending').innerText = pending;
+            document.getElementById('count-approved').innerText = approved;
+            document.getElementById('count-rejected').innerText = rejected;
+        }
+
+        function switchTab(status, tabBtn) {
+            currentStatusFilter = status;
+            
+            // Toggle active class on tab buttons
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            tabBtn.classList.add('active');
+            
+            renderCandidates();
+        }
+
+        function renderCandidates() {
+            const tbody = document.getElementById('candidates-body');
+            tbody.innerHTML = "";
+
+            const filtered = allCandidates.filter(c => c.estado === currentStatusFilter);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No hay solicitudes en esta sección.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(c => {
+                const date = new Date(c.fecha_registro).toLocaleDateString('es-ES', {
+                    day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'
+                });
+                
+                const profileBadge = c.perfil === "CISO" 
+                    ? `<span class="badge badge-ciso">CISO</span>` 
+                    : (c.perfil === "Derecho"
+                        ? `<span class="badge badge-law">Derecho</span>`
+                        : `<span class="badge badge-mixed">Mixto</span>`);
+                    
+                const expText = `${c.experiencia}`;
+                
+                let actionCell = "";
+                if (c.estado === "Pendiente") {
+                    actionCell = `
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <button class="btn-action btn-approve" style="background:var(--primary); color:#0b0f19; font-weight:600;" onclick="approveCandidate('${c.id}', 'CISO')">✔ Aprobar CISO</button>
+                            <button class="btn-action btn-approve" style="background:var(--secondary); color:#fff; font-weight:600;" onclick="approveCandidate('${c.id}', 'Derecho')">⚖️ Aprobar Derecho</button>
+                            <button class="btn-action btn-approve" style="background:#374151; color:#fff;" onclick="approveCandidate('${c.id}', 'Mixto')">🔀 Aprobar Mixto</button>
+                            <button class="btn-action btn-reject" style="margin-top:4px;" onclick="rejectCandidate('${c.id}')">✕ Rechazar</button>
+                        </div>
+                    `;
+                } else if (c.estado === "Aprobado") {
+                    const perfilAsignado = c.perfil_asignado || c.perfil || "CISO";
+                    actionCell = `
+                        <div style="margin-bottom:4px;"><small style="color:var(--text-muted);">Rol: <strong>${escapeHtml(perfilAsignado)}</strong></small></div>
+                        <span class="code-box" onclick="copyCodeText('${c.codigo_generado}')" title="Haga clic para copiar">
+                            ${c.codigo_generado}
+                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
+                            </svg>
+                        </span>
+                    `;
+                } else {
+                    actionCell = `<span style="color: var(--text-muted);">Rechazado</span>`;
+                }
+
+                const detailsText = `
+                    ${profileBadge}<br>
+                    <small style="color:var(--text-muted); line-height: 1.4;">
+                        <strong>Cargo:</strong> ${escapeHtml(c.cargo || "N/A")}<br>
+                        <strong>Años Exp:</strong> ${c.anios_experiencia || "0"} años (${c.experiencia})<br>
+                        <strong>País:</strong> ${escapeHtml(c.pais || "N/A")}<br>
+                        <strong>Edad:</strong> ${escapeHtml(c.rango_edad || "N/A")} | <strong>Género:</strong> ${escapeHtml(c.genero || "N/A")}
+                    </small>
+                `;
+                
+                const surveyText = `
+                    <div style="font-size:0.85rem; color:#d1d5db; line-height: 1.4;">
+                        <strong>Estudios:</strong> ${escapeHtml(c.estudios || "N/A")}<br>
+                        <strong>Certificaciones:</strong> ${escapeHtml(c.certificaciones || "No")}<br>
+                        <strong>Sector:</strong> ${escapeHtml(c.sector || "N/A")}<br>
+                        <strong>Uso IA:</strong> ${escapeHtml(c.uso_ia || "N/A")}<br>
+                        <strong>Normativa:</strong> ${escapeHtml(c.familiaridad_normativa || "N/A")}<br>
+                        <strong>Motivo:</strong> <span title="${escapeHtml(c.motivacion)}">${escapeHtml(c.motivacion)}</span>
+                    </div>
+                `;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${date}</td>
+                    <td style="font-weight:600;">${escapeHtml(c.nombre)}</td>
+                    <td>${escapeHtml(c.correo)}</td>
+                    <td>${detailsText}</td>
+                    <td>${escapeHtml(c.organizacion)}</td>
+                    <td style="max-width:300px;">${surveyText}</td>
+                    <td>${actionCell}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Acciones sobre candidatos
+        async function approveCandidate(id, perfil) {
+            if (!db) return;
+            
+            // Generar código aleatorio de un solo uso
+            const codeSuffix = Math.random().toString(36).substring(2, 7).toUpperCase(); // 5 caracteres
+            const accessCode = `INFOTEC-${codeSuffix}`;
+
+            try {
+                // 1. Guardar código en la colección 'codigos_acceso'
+                await db.collection("codigos_acceso").doc(accessCode).set({
+                    usado: false,
+                    candidato_id: id,
+                    perfil: perfil,
+                    fecha_creacion: new Date().toISOString()
+                });
+
+                // 2. Actualizar el registro del candidato
+                await db.collection("solicitudes_convocatoria").doc(id).update({
+                    estado: "Aprobado",
+                    perfil_asignado: perfil,
+                    codigo_generado: accessCode
+                });
+
+                // 3. Mostrar modal con el código generado
+                document.getElementById('modal-code-display').innerText = accessCode;
+                document.getElementById('code-modal').classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Error al aprobar candidato:", error);
+                alert("Hubo un error al registrar el código en Firebase: " + error.message);
+            }
+        }
+
+        async function rejectCandidate(id) {
+            if (!db) return;
+            if (!confirm("¿Está seguro de que desea rechazar esta solicitud?")) return;
+
+            try {
+                await db.collection("solicitudes_convocatoria").doc(id).update({
+                    estado: "Rechazado"
+                });
+            } catch (error) {
+                console.error("Error al rechazar candidato:", error);
+                alert("Error: " + error.message);
+            }
+        }
+
+        // Auxiliares de UI
+        function copyCodeText(text) {
+            navigator.clipboard.writeText(text);
+            alert(`Código ${text} copiado al portapapeles.`);
+        }
+
+        function copyModalCode() {
+            const code = document.getElementById('modal-code-display').innerText;
+            navigator.clipboard.writeText(code);
+            alert(`Código ${code} copiado al portapapeles. Listo para enviar.`);
+        }
+
+        function closeModal() {
+            document.getElementById('code-modal').classList.add('hidden');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return "";
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>

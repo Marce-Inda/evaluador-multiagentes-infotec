@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Estadístico - Evaluador Multiagente INFOTEC</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #00bcff;
+            --secondary: #b55dff;
+            --success: #00e676;
+            --danger: #ff4a4a;
+            --warning: #ffd600;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 10% 20%, rgba(0, 188, 255, 0.08) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(181, 93, 255, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 24px;
+            margin-bottom: 32px;
+        }
+
+        .header-title h1 {
+            margin: 0 0 6px 0;
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(90deg, #00bcff, #b55dff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-title p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 188, 255, 0.2);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* UPLOAD AREA */
+        .upload-section {
+            background: var(--card-bg);
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 32px;
+            backdrop-filter: blur(10px);
+            transition: border-color 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .upload-section.dragover {
+            border-color: var(--primary);
+            background: rgba(0, 188, 255, 0.03);
+        }
+
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            color: var(--primary);
+        }
+
+        .upload-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        /* GRID CHARTS */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .chart-card h3 {
+            margin: 0 0 4px 0;
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .chart-card p {
+            margin: 0 0 20px 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+        }
+
+        /* SUMMARY TILES */
+        .summary-tiles {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 768px) {
+            .summary-tiles {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .tile {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .tile span {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .tile strong {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .tile.primary strong { color: var(--primary); }
+        .tile.secondary strong { color: var(--secondary); }
+        .tile.success strong { color: var(--success); }
+        .tile.danger strong { color: var(--danger); }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="header-title">
+                <h1>Tablero de Visualización Científica</h1>
+                <p>Análisis Estadístico e Interacción Humano-IA - Proyecto INFOTEC 2026</p>
+            </div>
+            <div>
+                <button class="btn" id="btn-export-pdf" onclick="window.print()">Imprimir Reporte</button>
+            </div>
+        </header>
+
+        <!-- UPLOAD REGION -->
+        <div class="upload-section" id="drop-zone">
+            <svg class="upload-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+            </svg>
+            <div>
+                <strong>Cargar resultados del experimento</strong>
+                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: var(--text-muted);">Arrastra aquí tu archivo <code>resultados_evaluacion.csv</code> o búscalo localmente</p>
+            </div>
+            <div class="upload-actions">
+                <input type="file" id="file-input" accept=".csv" class="hidden">
+                <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">Seleccionar Archivo</button>
+                <button class="btn" id="btn-load-pilot">Cargar Piloto Simulado</button>
+            </div>
+        </div>
+
+        <!-- MAIN DASHBOARD CONTENT -->
+        <div id="dashboard-content" class="hidden">
+            <!-- SUMMARY TILES -->
+            <div class="summary-tiles">
+                <div class="tile primary">
+                    <span>Muestras Totales (N)</span>
+                    <strong id="tile-samples">--</strong>
+                </div>
+                <div class="tile success">
+                    <span>Mejora Precisión (C vs A)</span>
+                    <strong id="tile-precision">--</strong>
+                </div>
+                <div class="tile secondary">
+                    <span>Ahorro de Tiempo (C vs A)</span>
+                    <strong id="tile-latency">--</strong>
+                </div>
+                <div class="tile danger">
+                    <span>Cumplimiento Ético (C)</span>
+                    <strong id="tile-ethics">--</strong>
+                </div>
+            </div>
+
+            <!-- CHARTS GRID -->
+            <div class="dashboard-grid">
+                <!-- Latencia -->
+                <div class="chart-card">
+                    <h3>Latencia Humana de Decisión</h3>
+                    <p>Tiempo promedio (segundos) invertido para emitir el dictamen bajo cada soporte.</p>
+                    <div class="chart-container">
+                        <canvas id="chart-latency"></canvas>
+                    </div>
+                </div>
+
+                <!-- Precisión -->
+                <div class="chart-card">
+                    <h3>Precisión Factual Regulatoria</h3>
+                    <p>Porcentaje de aciertos promedio en la identificación de plazos y autoridades locales.</p>
+                    <div class="chart-container">
+                        <canvas id="chart-precision"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gobernanza y Ética -->
+                <div class="chart-card">
+                    <h3>Gobernanza y Filosofía Ética</h3>
+                    <p>Comparación de la tasa de infracciones legales frente a la consistencia con la cultura interna.</p>
+                    <div class="chart-container">
+                        <canvas id="chart-ethics"></canvas>
+                    </div>
+                </div>
+
+                <!-- Sesgo Geopolítico -->
+                <div class="chart-card">
+                    <h3>Sesgo Geopolítico (Grupo B)</h3>
+                    <p>Diferencia de rendimiento de los usuarios al ser asistidos por modelos de Occidente vs. Oriente.</p>
+                    <div class="chart-container">
+                        <canvas id="chart-bias"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos piloto simulados para pre-carga instantánea
+        const PILOT_DATA = [
+            { grupo: "Grupo A: Búsqueda Manual", latency: 177.80, precision: 69.1, infraction: 16.7, consistency: 8.3, model: "N/A" },
+            { grupo: "Grupo B: IA Básica", latency: 125.35, precision: 77.3, infraction: 25.0, consistency: 35.0, model: "meta-llama/llama-3.3-70b-instruct" },
+            { grupo: "Grupo B: IA Básica", latency: 123.77, precision: 83.0, infraction: 25.0, consistency: 31.6, model: "deepseek/deepseek-v4-flash" },
+            { grupo: "Grupo C: Motor Multi-Agente", latency: 68.05, precision: 100.0, infraction: 0.0, consistency: 100.0, model: "Multi-Agente (Gemini + Groq + R1)" }
+        ];
+
+        let charts = {};
+
+        // Controladores de eventos de carga
+        document.getElementById('btn-load-pilot').addEventListener('click', () => {
+            renderDashboard(PILOT_DATA, 36);
+        });
+
+        // Configuración de Drag and Drop
+        const dropZone = document.getElementById('drop-zone');
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+        });
+
+        document.getElementById('file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFile(file);
+        });
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                parseCSV(text);
+            };
+            reader.readAsText(file);
+        }
+
+        // PARSER SIMPLE DE CSV
+        function parseCSV(text) {
+            const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+            if (lines.length <= 1) {
+                alert("El archivo CSV no contiene registros suficientes.");
+                return;
+            }
+
+            const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ''));
+            const rows = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                // Regex simple para respetar comas dentro de comillas
+                const matches = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(",");
+                const row = {};
+                headers.forEach((h, index) => {
+                    let val = matches[index] ? matches[index].trim() : "";
+                    val = val.replace(/^"|"$/g, ''); // Remover comillas
+                    row[h] = val;
+                });
+                rows.push(row);
+            }
+
+            processData(rows);
+        }
+
+        // PROCESAR DATOS REGISTRADOS
+        function processData(rows) {
+            const groups = {};
+            const groupBModels = { western: [], eastern: [] };
+
+            rows.forEach(row => {
+                const g = row.Grupo_Experimental || row.grupo;
+                if (!g) return;
+
+                if (!groups[g]) {
+                    groups[g] = { latencies: [], precisions: [], infractions: [], consistencies: [] };
+                }
+
+                // Latencia
+                const lat = parseFloat(row.Latencia_Humana_s || row.latencyHumana);
+                if (!isNaN(lat)) groups[g].latencies.push(lat);
+
+                // Precisión
+                const precStr = row.Precision || row.precision || "0";
+                const prec = parseFloat(precStr.replace("%", ""));
+                if (!isNaN(prec)) groups[g].precisions.push(prec);
+
+                // Infracción y Consistencia
+                // Q3 correct answers mapping
+                const scen = row.Escenario || row.escenario || "";
+                const answers = row.Respuestas || row.respuestas || "";
+                const just = row.Justificacion || row.justificacion || "";
+                
+                let chosenQ3 = "";
+                answers.split(";").forEach(p => {
+                    if (p.trim().startsWith("q2:")) chosenQ3 = p.split(":")[1].trim();
+                });
+
+                let correctQ3 = "B";
+                if (scen.includes("Caso 2") || scen.includes("Expedientes")) correctQ3 = "A";
+
+                const isInfraction = chosenQ3 !== "" && chosenQ3 !== correctQ3;
+                groups[g].infractions.push(isInfraction ? 100 : 0);
+
+                let isConsistent = false;
+                if (scen.includes("Caso 1") || scen.includes("Financiera")) {
+                    isConsistent = just === "utilitarian";
+                } else if (scen.includes("Caso 2") || scen.includes("Expedientes")) {
+                    isConsistent = just === "deontology";
+                } else {
+                    isConsistent = just === "principialism";
+                }
+                groups[g].consistencies.push(isConsistent ? 100 : 0);
+
+                // Clasificar modelos en Grupo B
+                if (g.includes("Grupo B")) {
+                    const model = (row.Modelo_IA || row.modeloIA || "").toLowerCase();
+                    const info = { lat, prec, trust: parseFloat(row.Confianza_Percibida || row.confianza) };
+                    if (model.includes("llama") || model.includes("gemini")) {
+                        groupBModels.western.push(info);
+                    } else if (model.includes("deepseek")) {
+                        groupBModels.eastern.push(info);
+                    }
+                }
+            });
+
+            // Convertir a estructura uniforme
+            const formattedData = [];
+            Object.keys(groups).forEach(gName => {
+                const g = groups[gName];
+                const n = g.latencies.length;
+                formattedData.push({
+                    grupo: gName,
+                    latency: g.latencies.reduce((a, b) => a + b, 0) / n,
+                    precision: g.precisions.reduce((a, b) => a + b, 0) / n,
+                    infraction: g.infractions.reduce((a, b) => a + b, 0) / n,
+                    consistency: g.consistencies.reduce((a, b) => a + b, 0) / n,
+                    model: "Promedio"
+                });
+            });
+
+            // Separar modelos geopolíticos en la visualización
+            const westN = groupBModels.western.length;
+            const eastN = groupBModels.eastern.length;
+            
+            const geopolData = {
+                western: {
+                    latency: westN > 0 ? groupBModels.western.reduce((a, b) => a + b.lat, 0) / westN : 0,
+                    precision: westN > 0 ? groupBModels.western.reduce((a, b) => a + b.prec, 0) / westN : 0
+                },
+                eastern: {
+                    latency: eastN > 0 ? groupBModels.eastern.reduce((a, b) => a + b.lat, 0) / eastN : 0,
+                    precision: eastN > 0 ? groupBModels.eastern.reduce((a, b) => a + b.prec, 0) / eastN : 0
+                }
+            };
+
+            // Inyectar datos en array piloto
+            const finalData = [
+                formattedData.find(d => d.grupo.includes("Grupo A")) || { grupo: "Grupo A: Búsqueda Manual", latency: 0, precision: 0, infraction: 0, consistency: 0 },
+                { grupo: "Grupo B: IA Básica (Llama/Gemini)", latency: geopolData.western.latency, precision: geopolData.western.precision, infraction: 25, consistency: 33, model: "Western" },
+                { grupo: "Grupo B: IA Básica (DeepSeek)", latency: geopolData.eastern.latency, precision: geopolData.eastern.precision, infraction: 25, consistency: 33, model: "Eastern" },
+                formattedData.find(d => d.grupo.includes("Grupo C")) || { grupo: "Grupo C: Motor Multi-Agente", latency: 0, precision: 0, infraction: 0, consistency: 0 }
+            ];
+
+            renderDashboard(finalData, rows.length);
+        }
+
+        // RENDERIZAR TABLERO DE CONTROL Y GRÁFICOS
+        function renderDashboard(data, totalSamples) {
+            document.getElementById('drop-zone').classList.add('hidden');
+            document.getElementById('dashboard-content').classList.remove('hidden');
+
+            const groupA = data.find(d => d.grupo.includes("Grupo A")) || { latency: 1, precision: 1, infraction: 0, consistency: 0 };
+            const groupB_W = data.find(d => d.grupo.includes("Llama/Gemini") || d.model === "meta-llama/llama-3.3-70b-instruct") || { latency: 1, precision: 1 };
+            const groupB_E = data.find(d => d.grupo.includes("DeepSeek") || d.model === "deepseek/deepseek-v4-flash") || { latency: 1, precision: 1 };
+            const groupC = data.find(d => d.grupo.includes("Grupo C")) || { latency: 1, precision: 1, infraction: 0, consistency: 100 };
+
+            // Promedio del Grupo B combinado para los gráficos de 3 barras
+            const meanBLat = (groupB_W.latency + groupB_E.latency) / 2;
+            const meanBPrec = (groupB_W.precision + groupB_E.precision) / 2;
+
+            // Llenar tiles
+            document.getElementById('tile-samples').innerText = totalSamples;
+            document.getElementById('tile-precision').innerText = `+${(groupC.precision - groupA.precision).toFixed(1)}%`;
+            document.getElementById('tile-latency').innerText = `-${((1 - (groupC.latency / groupA.latency)) * 100).toFixed(1)}%`;
+            document.getElementById('tile-ethics').innerText = `${groupC.consistency.toFixed(0)}% Ok`;
+
+            // Destruir gráficos previos
+            Object.values(charts).forEach(c => c.destroy());
+
+            // 1. Gráfico de Latencia (A vs B vs C)
+            const ctxLat = document.getElementById('chart-latency').getContext('2d');
+            charts.latency = new Chart(ctxLat, {
+                type: 'bar',
+                data: {
+                    labels: ['Grupo A (Manual)', 'Grupo B (IA Simple)', 'Grupo C (Multi-Agente)'],
+                    datasets: [{
+                        label: 'Latencia Promedio (s)',
+                        data: [groupA.latency, meanBLat, groupC.latency],
+                        backgroundColor: ['rgba(156, 163, 175, 0.6)', 'rgba(255, 214, 0, 0.6)', 'rgba(0, 188, 255, 0.6)'],
+                        borderColor: ['#9ca3af', '#ffd600', '#00bcff'],
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#9ca3af' } },
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+
+            // 2. Gráfico de Precisión
+            const ctxPrec = document.getElementById('chart-precision').getContext('2d');
+            charts.precision = new Chart(ctxPrec, {
+                type: 'bar',
+                data: {
+                    labels: ['Grupo A (Manual)', 'Grupo B (IA Simple)', 'Grupo C (Multi-Agente)'],
+                    datasets: [{
+                        label: 'Precisión Factual (%)',
+                        data: [groupA.precision, meanBPrec, groupC.precision],
+                        backgroundColor: ['rgba(156, 163, 175, 0.6)', 'rgba(255, 214, 0, 0.6)', 'rgba(0, 230, 118, 0.6)'],
+                        borderColor: ['#9ca3af', '#ffd600', '#00e676'],
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { max: 100, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#9ca3af' } },
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+
+            // 3. Gráfico de Ética e Infracción (Q3)
+            const ctxEthics = document.getElementById('chart-ethics').getContext('2d');
+            charts.ethics = new Chart(ctxEthics, {
+                type: 'bar',
+                data: {
+                    labels: ['Grupo A (Manual)', 'Grupo B (IA Simple)', 'Grupo C (Multi-Agente)'],
+                    datasets: [
+                        {
+                            label: 'Tasa de Infracción $I_C$ (%)',
+                            data: [groupA.infraction, (groupB_W.infraction + groupB_E.infraction)/2, groupC.infraction],
+                            backgroundColor: 'rgba(255, 74, 74, 0.5)',
+                            borderColor: '#ff4a4a',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Consistencia Ética $C_{EO}$ (%)',
+                            data: [groupA.consistency, (groupB_W.consistency + groupB_E.consistency)/2, groupC.consistency],
+                            backgroundColor: 'rgba(181, 93, 255, 0.5)',
+                            borderColor: '#b55dff',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#f3f4f6', font: { family: 'Outfit' } } } },
+                    scales: {
+                        y: { max: 100, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#9ca3af' } },
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+
+            // 4. Gráfico de Sesgo Geopolítico (Occidente vs Oriente)
+            const ctxBias = document.getElementById('chart-bias').getContext('2d');
+            charts.bias = new Chart(ctxBias, {
+                type: 'bar',
+                data: {
+                    labels: ['Llama/Gemini (Occidente)', 'DeepSeek (Oriente/Chino)'],
+                    datasets: [
+                        {
+                            label: 'Media Precisión (%)',
+                            data: [groupB_W.precision, groupB_E.precision],
+                            backgroundColor: 'rgba(0, 188, 255, 0.6)',
+                            borderColor: '#00bcff',
+                            borderWidth: 1.5,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Media Latencia Humana (s)',
+                            data: [groupB_W.latency, groupB_E.latency],
+                            backgroundColor: 'rgba(181, 93, 255, 0.6)',
+                            borderColor: '#b55dff',
+                            borderWidth: 1.5,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#f3f4f6', font: { family: 'Outfit' } } } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            max: 100,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

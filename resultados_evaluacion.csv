@@ -1,0 +1,37 @@
+Fecha,Participante,Grupo_Experimental,Experiencia_Previa,Escenario,Modelo_IA,Latencia_IA_s,Latencia_Humana_s,Respuestas,Precision,Justificacion,Confianza_Percibida
+2026-07-23 08:45:32,CISO-01,Grupo A: Búsqueda Manual,Intermedio,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,140.66,q0:A; q1:D; q2:A,0%,utilitarian,N/A
+2026-07-23 08:45:32,CISO-01,Grupo B: IA Básica,Intermedio,Caso 2: Filtración de Expedientes (México),meta-llama/llama-3.3-70b-instruct,5.039,109.89,q0:D; q1:B; q2:B,66%,pragmatic,5
+2026-07-23 08:45:32,CISO-01,Grupo C: Motor Multi-Agente,Intermedio,Caso 3: Data Breach (Brasil / Chile),meta-llama/llama-3.3-70b-instruct,17.773,70.24,q0:A; q1:C; q2:B,100%,principialism,5
+2026-07-23 08:45:32,CISO-02,Grupo A: Búsqueda Manual,Avanzado,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,139.13,q0:A; q1:D; q2:B,33%,deontology,N/A
+2026-07-23 08:45:32,CISO-02,Grupo B: IA Básica,Avanzado,Caso 2: Filtración de Expedientes (México),deepseek/deepseek-v4-flash,5.215,84.7,q0:D; q1:B; q2:B,66%,utilitarian,5
+2026-07-23 08:45:32,CISO-02,Grupo C: Motor Multi-Agente,Avanzado,Caso 3: Data Breach (Brasil / Chile),deepseek/deepseek-v4-flash,15.757,60.47,q0:A; q1:C; q2:B,100%,principialism,5
+2026-07-23 08:45:32,CISO-03,Grupo B: IA Básica,Experto,Caso 2: Filtración de Expedientes (México),meta-llama/llama-3.3-70b-instruct,5.276,89.21,q0:D; q1:B; q2:B,66%,pragmatic,5
+2026-07-23 08:45:32,CISO-03,Grupo C: Motor Multi-Agente,Experto,Caso 3: Data Breach (Brasil / Chile),meta-llama/llama-3.3-70b-instruct,15.378,64.7,q0:A; q1:C; q2:B,100%,principialism,4
+2026-07-23 08:45:32,CISO-03,Grupo A: Búsqueda Manual,Experto,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,120.11,q0:A; q1:A; q2:B,66%,deontology,N/A
+2026-07-23 08:45:32,CISO-04,Grupo B: IA Básica,Avanzado,Caso 2: Filtración de Expedientes (México),deepseek/deepseek-v4-flash,6.525,109.46,q0:D; q1:B; q2:A,100%,deontology,4
+2026-07-23 08:45:32,CISO-04,Grupo C: Motor Multi-Agente,Avanzado,Caso 3: Data Breach (Brasil / Chile),deepseek/deepseek-v4-flash,17.573,57.69,q0:A; q1:C; q2:B,100%,principialism,4
+2026-07-23 08:45:32,CISO-04,Grupo A: Búsqueda Manual,Avanzado,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,139.1,q0:B; q1:D; q2:B,66%,deontology,N/A
+2026-07-23 08:45:32,CISO-05,Grupo C: Motor Multi-Agente,Experto,Caso 3: Data Breach (Brasil / Chile),meta-llama/llama-3.3-70b-instruct,16.168,55.69,q0:A; q1:C; q2:B,100%,principialism,5
+2026-07-23 08:45:32,CISO-05,Grupo A: Búsqueda Manual,Experto,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,160.0,q0:B; q1:D; q2:B,66%,deontology,N/A
+2026-07-23 08:45:32,CISO-05,Grupo B: IA Básica,Experto,Caso 2: Filtración de Expedientes (México),meta-llama/llama-3.3-70b-instruct,5.117,100.7,q0:D; q1:B; q2:B,66%,pragmatic,4
+2026-07-23 08:45:32,CISO-06,Grupo C: Motor Multi-Agente,Intermedio,Caso 3: Data Breach (Brasil / Chile),deepseek/deepseek-v4-flash,16.046,62.34,q0:A; q1:C; q2:B,100%,principialism,5
+2026-07-23 08:45:32,CISO-06,Grupo A: Búsqueda Manual,Intermedio,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,156.83,q0:A; q1:A; q2:A,33%,utilitarian,N/A
+2026-07-23 08:45:32,CISO-06,Grupo B: IA Básica,Intermedio,Caso 2: Filtración de Expedientes (México),deepseek/deepseek-v4-flash,5.696,103.44,q0:D; q1:B; q2:A,100%,formalism,5
+2026-07-23 08:45:32,DER-01,Grupo A: Búsqueda Manual,Intermedio,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,213.73,q0:B; q1:A; q2:B,100%,deontology,N/A
+2026-07-23 08:45:32,DER-01,Grupo B: IA Básica,Intermedio,Caso 2: Filtración de Expedientes (México),deepseek/deepseek-v4-flash,6.949,132.64,q0:D; q1:B; q2:A,100%,formalism,3
+2026-07-23 08:45:32,DER-01,Grupo C: Motor Multi-Agente,Intermedio,Caso 3: Data Breach (Brasil / Chile),deepseek/deepseek-v4-flash,17.127,83.33,q0:A; q1:C; q2:B,100%,principialism,4
+2026-07-23 08:45:32,DER-02,Grupo A: Búsqueda Manual,Avanzado,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,254.01,q0:B; q1:A; q2:B,100%,deontology,N/A
+2026-07-23 08:45:32,DER-02,Grupo B: IA Básica,Avanzado,Caso 2: Filtración de Expedientes (México),meta-llama/llama-3.3-70b-instruct,5.065,132.76,q0:D; q1:B; q2:A,100%,formalism,2
+2026-07-23 08:45:32,DER-02,Grupo C: Motor Multi-Agente,Avanzado,Caso 3: Data Breach (Brasil / Chile),meta-llama/llama-3.3-70b-instruct,15.226,86.04,q0:A; q1:C; q2:B,100%,principialism,4
+2026-07-23 08:45:32,DER-03,Grupo B: IA Básica,Avanzado,Caso 2: Filtración de Expedientes (México),deepseek/deepseek-v4-flash,4.603,174.48,q0:D; q1:B; q2:A,100%,formalism,3
+2026-07-23 08:45:32,DER-03,Grupo C: Motor Multi-Agente,Avanzado,Caso 3: Data Breach (Brasil / Chile),deepseek/deepseek-v4-flash,17.469,73.0,q0:A; q1:C; q2:B,100%,principialism,4
+2026-07-23 08:45:32,DER-03,Grupo A: Búsqueda Manual,Avanzado,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,181.46,q0:B; q1:D; q2:B,66%,formalism,N/A
+2026-07-23 08:45:32,DER-04,Grupo B: IA Básica,Experto,Caso 2: Filtración de Expedientes (México),meta-llama/llama-3.3-70b-instruct,5.79,146.81,q0:D; q1:B; q2:A,100%,formalism,2
+2026-07-23 08:45:32,DER-04,Grupo C: Motor Multi-Agente,Experto,Caso 3: Data Breach (Brasil / Chile),meta-llama/llama-3.3-70b-instruct,13.94,81.54,q0:A; q1:C; q2:B,100%,principialism,5
+2026-07-23 08:45:32,DER-04,Grupo A: Búsqueda Manual,Experto,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,212.15,q0:B; q1:A; q2:B,100%,deontology,N/A
+2026-07-23 08:45:32,DER-05,Grupo C: Motor Multi-Agente,Experto,Caso 3: Data Breach (Brasil / Chile),deepseek/deepseek-v4-flash,14.897,65.3,q0:A; q1:C; q2:B,100%,principialism,4
+2026-07-23 08:45:32,DER-05,Grupo A: Búsqueda Manual,Experto,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,196.22,q0:B; q1:A; q2:B,100%,formalism,N/A
+2026-07-23 08:45:32,DER-05,Grupo B: IA Básica,Experto,Caso 2: Filtración de Expedientes (México),deepseek/deepseek-v4-flash,5.88,176.46,q0:D; q1:B; q2:A,100%,formalism,3
+2026-07-23 08:45:32,DER-06,Grupo C: Motor Multi-Agente,Intermedio,Caso 3: Data Breach (Brasil / Chile),meta-llama/llama-3.3-70b-instruct,16.781,70.62,q0:A; q1:C; q2:B,100%,principialism,5
+2026-07-23 08:45:32,DER-06,Grupo A: Búsqueda Manual,Intermedio,Caso 1: Brecha Financiera (Uruguay),N/A,0.0,199.65,q0:B; q1:D; q2:B,66%,formalism,N/A
+2026-07-23 08:45:32,DER-06,Grupo B: IA Básica,Intermedio,Caso 2: Filtración de Expedientes (México),meta-llama/llama-3.3-70b-instruct,5.187,159.6,q0:D; q1:B; q2:A,100%,deontology,3

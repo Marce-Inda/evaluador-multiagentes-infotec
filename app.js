@@ -31,26 +31,262 @@ if (isFirebaseAvailable) {
 
 // Base de datos de leyes interna (Fallback local ante fallos CORS en protocolo file://)
 const FALLBACK_REGULATORY_DATABASE = [
-    {
-        "source": "Uruguay - Banco Central del Uruguay (BCU) Comunicación 2021/2318 y Circular 2318",
-        "text": "Recopilación de Normas de Regulación y Control del Sistema Financiero del Banco Central del Uruguay (BCU): De conformidad con la Circular 2318 y la Comunicación 2021/2318, las entidades reguladas por el BCU (bancos, procesadores de pago, emisores de tarjetas) tienen la obligación legal de reportar al regulador financiero todo incidente de seguridad de la información calificado como crítico. Dicho reporte preliminar de vulneración debe presentarse en un plazo máximo e improrrogable de 24 horas contadas a partir de la detección o sospecha razonable del evento. Las sanciones por incumplimiento en la notificación o por reportes tardíos oscilan desde apercibimientos formales e inhabilitaciones temporales de directores, hasta multas pecuniarias de hasta 2,000,000 de Unidades Indexadas (UI) y la revocación de la licencia para operar en el territorio uruguayo."
-    },
-    {
-        "source": "México - Secretaría de Salud (NOM-004-SSA3-2012) e INAI (LGPDPPSO)",
-        "text": "Norma Oficial Mexicana NOM-004-SSA3-2012 del Expediente Clínico y la Ley General de Protección de Datos Personales en Posesión de Sujetos Obligados (LGPDPPSO): El tratamiento de expedientes clínicos electrónicos en territorio mexicano implica la custodia de datos personales de carácter sensible. Ante una brecha de seguridad (acceso no autorizado, pérdida, copia o alteración de fichas clínicas), el CISO o Responsable del tratamiento debe dar aviso obligatorio tanto a los titulares afectados como al INAI (o Secretaría de Salud si corresponde al sector público) dentro de las 72 horas hábiles contadas a partir de que se tenga conocimiento del incidente. La omisión del deber de notificación se sanciona penal y administrativamente de acuerdo con el Título Noveno de la Ley, contemplando multas severas de hasta 320,000 Unidades de Medida y Actualización (UMA) e inhabilitación del personal médico y directivo involucrado en la negligencia."
-    },
-    {
-        "source": "Brasil - Lei Geral de Proteção de Datos (LGPD - Ley 13.709) y ANPD",
-        "text": "Ley General de Protección de Datos de Brasil (LGPD - Lei Nº 13.709): Conforme al Artículo 48 de la LGPD, el controlador del tratamiento de datos personales debe comunicar a la Autoridad Nacional de Protección de Datos (ANPD) y a los titulares la ocurrencia de cualquier incidente de seguridad que pueda generar riesgo o daño relevante para los individuos. La ley prescribe que la comunicación se debe realizar en un 'plazo razonable', el cual la ANPD y la jurisprudencia interpretan doctrinariamente como un período de 48 a 72 horas a partir del conocimiento del incidente. Las sanciones administrativas por incumplir con las obligaciones de gobernanza o notificación a tiempo pueden representar multas de hasta el 2% de la facturación de la persona jurídica en Brasil, con un tope de 50,000,000 de reales por infracción."
-    },
-    {
-        "source": "Chile - Ley Marco de Ciberseguridad e Infraestructura Crítica y CSIRT Nacional",
-        "text": "Chile - Ley Marco de Ciberseguridad (Ley Nº 21.660) y Normas Sectoriales del CSIRT: Las instituciones identificadas como operadores de infraestructura crítica de la información o proveedores de servicios esenciales (de salud, finanzas, transporte, energía) tienen la obligación legal estricta de notificar al CSIRT de la Subsecretaría del Interior y a las superintendencias correspondientes cualquier incidente cibernético calificado como de impacto significativo o grave. El plazo legal establecido para esta notificación inicial es inmediato y no debe exceder las 3 horas contadas desde el inicio de la contención técnica o el conocimiento del incidente. Las multas por retardo o no notificación varían según la gravedad y el sector, pudiendo alcanzar hasta las 15,000 UTM (Unidades Tributarias Mensuales) para operadores públicos o privados esenciales."
-    },
-    {
-        "source": "Estándares Globales de Ciberseguridad y Gobernanza (ISO/IEC 27001 y NIST SP 800-61)",
-        "text": "Estándares de Seguridad de la Información (ISO/IEC 27001:2022 Control A.5.34 y Guía NIST SP 800-61 Rev 2 para el Manejo de Incidentes): Las buenas prácticas internacionales de gobernanza técnica y organizativa estipulan que el ciclo de vida de gestión de incidentes debe estructurarse en fases bien delimitadas: Preparación, Detección y Análisis, Contención, Erradicación y Recuperación, y Actividades Post-Incidente. Las directrices exigen documentar sistemáticamente el análisis forense, registrar las lecciones aprendidas y establecer un plan de comunicación de crisis que diferencie los plazos técnicos de contención de los plazos legales de notificación a los reguladores correspondientes de cada país afectado por la brecha transfronteriza."
-    }
+  {
+    "id": "REG-UY-01",
+    "source": "Uruguay - Banco Central del Uruguay (BCU) Circular 2318 y Comunicación 2021/2318",
+    "jurisdiction": "Uruguay (Sector Financiero / BCU)",
+    "category": "Sectorial Financiero",
+    "scenario_ref": "Escenario 1 (uy-finance-breach) - Dilema 1 (uy-fin-govern-01)",
+    "time_limit": "24 horas improrrogables a partir de la detección o sospecha razonable del evento.",
+    "receiving_authority": "Banco Central del Uruguay (BCU) - Superintendencia de Servicios Financieros.",
+    "scope": "Entidades financieras reguladas, procesadores de pago de liquidez sistémica y emisores de tarjetas de crédito/débito.",
+    "articles": "Circular BCU N° 2318; Recopilación de Normas de Regulación y Control del Sistema Financiero (RNRC SF) Cap. Gestión de Riesgos de Ciberseguridad.",
+    "penalties": "Apercibimientos formales, inhabilitación temporal o definitiva de directores y gerentes, multas de hasta 2,000,000 de Unidades Indexadas (UI) y revocación de la licencia para operar en el territorio uruguayo.",
+    "operational_implications": "La notificación formal al BCU es un deber estricto e improrrogable. La postergación unilateral para evitar una corrida bancaria o pánico de mercado constituye una infracción gravísima, aunque la entidad busque estabilizar la liquidez técnica de forma interna.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.RM-02 (Apetito y Tolerancia al Riesgo Regulatorio vs. Riesgo Sistémico)",
+    "official_url": "https://www.bcu.gub.uy/Servicios-Financieros-Administracion/Paginas/Normativa.aspx",
+    "text": "Recopilación de Normas de Regulación y Control del Sistema Financiero del BCU (Circular 2318): Exige a los procesadores de pago e instituciones reguladas notificar al BCU todo incidente de seguridad calificado como crítico en un plazo máximo e improrrogable de 24 horas tras su detección o sospecha razonable. El incumplimiento conlleva sanciones de hasta 2,000,000 UI y la revocación de la licencia operativa."
+  },
+  {
+    "id": "REG-UY-02",
+    "source": "Uruguay - Ley Nº 18.331 de Protección de Datos Personales y URCDP",
+    "jurisdiction": "Uruguay (General / Protección de Datos)",
+    "category": "Protección de Datos",
+    "scenario_ref": "Escenario 1 (uy-finance-breach) - Protección General",
+    "time_limit": "Notificación en plazo razonable sin dilación tras la constatación de la vulneración.",
+    "receiving_authority": "Unidad Reguladora y de Control de Datos Personales (URCDP).",
+    "scope": "Cualquier persona física o jurídica, pública o privada, que trate datos personales en territorio uruguayo.",
+    "articles": "Ley N° 18.331 Art. 12 (Deber de Seguridad y Confidencialidad), Reglamentada por el Decreto N° 64/020.",
+    "penalties": "Apercibimiento, apercibimiento con publicación en medios de prensa, suspensión temporal de la base de datos y multas de hasta 500,000 UI.",
+    "operational_implications": "Obliga a implementar medidas técnicas y organizativas para garantizar la confidencialidad de datos de tarjetahabientes y notificar a la URCDP ante cualquier acceso o exfiltración no autorizada.",
+    "nist_csf_mapping": "NIST CSF 2.0: PR.DS-01 (Protección de Datos en Reposo y Tránsito)",
+    "official_url": "https://www.impo.com.uy/bases/leyes/18331-2008",
+    "text": "Ley Nº 18.331 de Protección de Datos Personales de Uruguay: El Artículo 12 establece el deber de adoptar medidas de seguridad para evitar la alteración, pérdida, tratamiento o acceso no autorizado a los datos personales. Exige notificar a la URCDP sobre vulneraciones de seguridad que comprometan datos de usuarios."
+  },
+  {
+    "id": "REG-UY-03",
+    "source": "Uruguay - Ley N° 10.489 e Indemnización por Despido (Doctrina de Notoria Mala Conducta)",
+    "jurisdiction": "Uruguay (Derecho Laboral)",
+    "category": "Laboral / Recursos Humanos",
+    "scenario_ref": "Escenario 1 (uy-finance-breach) - Dilema 2 (uy-fin-govern-02)",
+    "time_limit": "Aplica ante el cese de la relación laboral.",
+    "receiving_authority": "Ministerio de Trabajo y Seguridad Social (MTSS) y Tribunales de Trabajo de Uruguay.",
+    "scope": "Relaciones de trabajo dependientes en el sector privado uruguayo.",
+    "articles": "Ley N° 10.489; Ley N° 12.597; Jurisprudencia laboral sobre 'Notoria Mala Conducta'.",
+    "penalties": "Obligación de pago de la Indemnización por Despido (IPD) legal completa más daños y perjuicios sancionatorios si se despide sin probar la notoria mala conducta.",
+    "operational_implications": "Bajo la legislación uruguaya, un error operativo cometido por un empleado técnico bajo la presión de resolver una caída del servicio (ej. compartir una clave por Slack) no configura automáticamente 'notoria mala conducta'. Despedirlo de inmediato genera una contingencia indemnizatoria grave y deja a la empresa sin la capacidad técnica para operar el sistema legacy en plena crisis.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.RR-04 (Responsabilidad Organizacional y Cultura No Punitiva / ISO 27001 A.7.2)",
+    "official_url": "https://www.impo.com.uy/bases/leyes/10489-1944",
+    "text": "Ley N° 10.489 de Uruguay (Régimen de Despido): La exoneración de la indemnización por despido exige prueba fehaciente de 'notoria mala conducta' (intención dolosa o falta gravísima reiterada). Los errores operativos involuntarios durante la contención de una falla no justifican despido procedente sin indemnización."
+  },
+  {
+    "id": "REG-AR-01",
+    "source": "Argentina - Ley N° 25.326 de Protección de Datos y Resolución AAIP 47/2018",
+    "jurisdiction": "Argentina (Mercosur / Transfronterizo)",
+    "category": "Protección de Datos Transfronteriza",
+    "scenario_ref": "Escenario 1 (uy-finance-breach) - Dilema 3 (uy-fin-govern-03)",
+    "time_limit": "Plazo recomendado de 48 horas contadas a partir de la detección del incidente.",
+    "receiving_authority": "Agencia de Acceso a la Información Pública (AAIP) de la República Argentina.",
+    "scope": "Tratamiento de datos personales de residentes argentinos por entidades locales o extranjeras que impacten su jurisdicción.",
+    "articles": "Ley N° 25.326 Art. 9 (Seguridad de los datos); Resolución AAIP N° 47/2018 (Medidas de Seguridad para el Tratamiento de Datos).",
+    "penalties": "Apercibimientos, suspensión de bases de datos y multas de hasta $100,000 ARS (en proceso de actualización legislativa a montos severos).",
+    "operational_implications": "Existe una asimetría regulatoria entre Uruguay (BCU 24h) y Argentina (AAIP 48h). El CISO de una empresa uruguaya que procesa datos de tarjetahabientes argentinos debe gestionar el reporte transfronterizo sin emitir declaraciones contradictorias entre ambas autoridades.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.OC-03 (Cumplimiento de Requerimientos Regulatorios y Legales Multi-jurisdiccionales)",
+    "official_url": "https://www.argentina.gob.ar/aaip/datospersonales",
+    "text": "Ley 25.326 y Res. AAIP 47/2018 de Argentina: Establecen la obligación de implementar controles de seguridad y recomiendan notificar a la AAIP las brechas de seguridad dentro de las 48 horas de detectadas cuando afecten a titulares residentes en la República Argentina."
+  },
+  {
+    "id": "REG-MX-01",
+    "source": "México - NOM-004-SSA3-2012 del Expediente Clínico Electrónico",
+    "jurisdiction": "México (Sector Salud)",
+    "category": "Sectorial Salud",
+    "scenario_ref": "Escenario 2 (mx-hospital-ransomware) - Custodia de Expedientes",
+    "time_limit": "Notificación inmediata a autoridades sanitarias ante compromisos que interrumpan la atención médica.",
+    "receiving_authority": "Secretaría de Salud de México y COFEPRIS.",
+    "scope": "Prestadores de servicios de salud públicos y privados en el territorio mexicano.",
+    "articles": "NOM-004-SSA3-2012 Numerales 5.4, 5.5 y 5.6 (Confidencialidad y Custodia del Expediente Clínico).",
+    "penalties": "Sanciones administrativas en materia sanitaria, clausura temporal o definitiva del establecimiento y suspensión de licencias médicas.",
+    "operational_implications": "Establece que el expediente clínico es propiedad del hospital y del paciente, exigiendo la adopción de medidas estrictas para preservar la continuidad del servicio médico y la integridad de los datos de salud.",
+    "nist_csf_mapping": "NIST CSF 2.0: PR.DS-02 (Mantenimiento de la Integridad y Disponibilidad de Datos Críticos de Salud)",
+    "official_url": "https://www.dof.gob.mx/nota_detalle.php?codigo=5272787&fecha=15/10/2012",
+    "text": "NOM-004-SSA3-2012 de México: Regula la integración, uso, custodia y confidencialidad del expediente clínico electrónico. Obliga a los hospitales a garantizar la disponibilidad permanente de las fichas clínicas para proteger la vida de los pacientes."
+  },
+  {
+    "id": "REG-MX-02",
+    "source": "México - LGPDPPSO y LFPDPPP (INAI - Datos Sensibles de Salud)",
+    "jurisdiction": "México (Protección de Datos Personales)",
+    "category": "Protección de Datos Sensibles",
+    "scenario_ref": "Escenario 2 (mx-hospital-ransomware) - Dilema 3 (mx-hosp-govern-05)",
+    "time_limit": "Dentro de las 72 horas hábiles contadas a partir de que se tenga conocimiento de la brecha.",
+    "receiving_authority": "INAI (Instituto Nacional de Transparencia, Acceso a la Información y Protección de Datos Personales).",
+    "scope": "Sujetos obligados públicos y entidades privadas (hospitales) que manejen datos personales sensibles de salud.",
+    "articles": "LGPDPPSO Art. 31, 35 y 85; LFPDPPP Art. 19 y 64 (Título Noveno de Infracciones y Sanciones).",
+    "penalties": "Multas de hasta 320,000 Unidades de Medida y Actualización (UMA) para privados, y responsabilidad administrativa grave con inhabilitación para funcionarios públicos.",
+    "operational_implications": "Exige notificar de forma prioritaria e inmediata tanto al INAI como a los pacientes afectados cuando ocurra una brecha que comprometa historiales médicos o datos personales sensibles.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.OC-03 (Cumplimiento Regulatorio ante Autoridades de Transparencia)",
+    "official_url": "https://home.inai.org.mx",
+    "text": "LGPDPPSO y LFPDPPP de México: Prescriben la obligación de informar a los titulares y al INAI en un plazo máximo de 72 horas hábiles sobre cualquier brecha de seguridad que afecte datos personales sensibles de salud. Las omisiones se sancionan con multas de hasta 320,000 UMA."
+  },
+  {
+    "id": "REG-MX-03",
+    "source": "México - Constitución Art. 4º y Código Penal Federal Art. 228 vs LFPIORPI (Pago de Rescates)",
+    "jurisdiction": "México (Constitucional, Penal y Anti-Lavado)",
+    "category": "Bioética / Legis. Penal y Financiera",
+    "scenario_ref": "Escenario 2 (mx-hospital-ransomware) - Dilema 1 (mx-hosp-govern-01)",
+    "time_limit": "Deber continuo e inmediato de preservación de la vida humana.",
+    "receiving_authority": "Fiscalía General de la República (FGR), CERT-MX y Autoridades Judiciales.",
+    "scope": "Directivos hospitalarios, CISOs y personal médico en México.",
+    "articles": "Constitución Mexicana Art. 4º (Derecho a la Salud); Código Penal Federal Art. 228 (Negligencia y Omisión de Cuidados); LFPIORPI (Anti-Lavado de Dinero) / Directivas OFAC.",
+    "penalties": "Responsabilidad penal directa (prisión) por homicidio culposo u omisión de cuidados si se suspenden servicios vitales por no restaurar sistemas, colisionando con el delito de financiamiento al crimen organizado si se paga el rescate a extorsionadores.",
+    "operational_implications": "Genera una contradicción irresoluble entre la política de 'no pago de rescates' (para cumplir con LFPIORPI/OFAC) y el deber jurídico-bioético de salvar la vida de pacientes en UCI amenazados por la parálisis de los equipos de soporte vital.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.RM-02 (Gestión de Riesgo Vital y Tolerancia en Crisis de Bioética)",
+    "official_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/CPEUM.pdf",
+    "text": "Constitución de México Art. 4º y Código Penal Federal Art. 228: Garantizan el derecho a la salud e imponen responsabilidad penal por negligencia médica u omisión de cuidados ante riesgo de muerte. Esto entra en colisión directa con leyes anti-lavado (LFPIORPI) que prohíben financiar organizaciones criminales mediante pagos de ransomware."
+  },
+  {
+    "id": "REG-MX-04",
+    "source": "México - Ley Federal del Trabajo (LFT) Artículo 47 (Despido Laboral y Phishing)",
+    "jurisdiction": "México (Derecho Laboral)",
+    "category": "Laboral / Recursos Humanos",
+    "scenario_ref": "Escenario 2 (mx-hospital-ransomware) - Dilema 2 (mx-hosp-govern-04)",
+    "time_limit": "30 días hábiles para ejercer la rescisión patronal tras conocer la falta.",
+    "receiving_authority": "Juntas de Conciliación y Arbitraje / Tribunales Laborales de México.",
+    "scope": "Empresarios y trabajadores regidos por el apartado A del artículo 123 constitucional.",
+    "articles": "Ley Federal del Trabajo Art. 47 (Causales de Rescisión sin Responsabilidad para el Patrón) y Art. 48.",
+    "penalties": "Condena al pago de indemnización constitucional de 3 meses de salario, salarios vencidos e intereses procesales por despido injustificado.",
+    "operational_implications": "Un empleado que cae en un engaño de ingeniería social (phishing sofisticado) sin intención dolosa no incurre en falta de probidad u honradez. Despedirlo de forma punitiva expone a la institución a demandas laborales perdidas y destruye la cultura interna de notificación temprana de incidentes.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.RR-04 (Roles, Responsabilidades y Cultura de Seguridad Restaurativa / PR.AT-01)",
+    "official_url": "https://www.diputados.gob.mx/LeyesBiblio/pdf/LFT.pdf",
+    "text": "Ley Federal del Trabajo (LFT) Art. 47 de México: Enumera taxativamente las causas justificadas de despido sin indemnización (falta de probidad, violencia, dolo). Ser víctima de phishing sin intención maliciosa no constituye causa de rescisión justificada, configurando despido injustificado con derecho a indemnización (Art. 48)."
+  },
+  {
+    "id": "REG-US-01",
+    "source": "EE.UU. - HIPAA Breach Notification Rule (45 CFR §§ 164.400-414) - Umbral de 500 Registros",
+    "jurisdiction": "Estados Unidos (Salud / Transfronterizo)",
+    "category": "Internacional / Sectorial Salud",
+    "scenario_ref": "Escenario 2 (mx-hospital-ransomware) - Dilema 3 (mx-hosp-govern-05)",
+    "time_limit": "Notificación inmediata a la Secretaría de HHS sin demora indebida y no más de 60 días; reporte a medios masivos si afecta a >= 500 individuos.",
+    "receiving_authority": "U.S. Department of Health & Human Services (HHS) - Office for Civil Rights (OCR).",
+    "scope": "Entidades cubiertas (Covered Entities) y asociados de negocio que traten PHI de ciudadanos/residentes estadounidenses.",
+    "articles": "Health Insurance Portability and Accountability Act (HIPAA) 45 CFR § 164.406 y § 164.408.",
+    "penalties": "Multas civiles pecuniarias graduadas que varían desde $100 hasta $50,000 USD por violación (con un máximo de $1.5 millones USD por año) y demandas colectivas.",
+    "operational_implications": "Al alcanzarse exactamente el umbral de 500 pacientes estadounidenses (turismo médico), se activa la obligación estricta de reportar a HHS y emitir un comunicado de prensa en medios locales de EE.UU., elevando sustancialmente la exposición pública internacional del hospital.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.OC-03 (Cumplimiento de Estándares Internacionales Transfronterizos)",
+    "official_url": "https://www.hhs.gov/hipaa/for-professionals/breach-notification/index.html",
+    "text": "HIPAA Breach Notification Rule (EE.UU.): Exige notificar a la Secretaría de HHS y alertar a medios de comunicación prominentes de la jurisdicción cuando una brecha de seguridad afecte la información médica protegida (PHI) de 500 o más personas."
+  },
+  {
+    "id": "REG-EU-01",
+    "source": "Unión Europea - GDPR (Reglamento UE 2016/679) Artículos 3, 33 y 34",
+    "jurisdiction": "Unión Europea (Transfronterizo / GDPR)",
+    "category": "Internacional / Protección de Datos",
+    "scenario_ref": "Escenario 2 (mx-hospital-ransomware) - Dilema 3 (mx-hosp-govern-05)",
+    "time_limit": "Máximo 72 horas después de haber tenido constancia de la brecha ante la autoridad de control.",
+    "receiving_authority": "Autoridades de Protección de Datos de los Estados Miembros de la UE (DPA).",
+    "scope": "Tratamiento de datos personales de interesados que se encuentren en la UE por responsables no establecidos en la UE (Principio de Extraterritorialidad, Art. 3.2).",
+    "articles": "Reglamento (UE) 2016/679 (GDPR) Artículos 3(2), 33 (Notificación a la Autoridad) y 34 (Comunicación al Interesado).",
+    "penalties": "Multas administrativas de hasta 20,000,000 EUR o el 4% del volumen de negocio global anual del ejercicio anterior.",
+    "operational_implications": "El tratamiento de datos de pacientes europeos en un hospital mexicano atrae la jurisdicción extraterritorial del GDPR. Omitir la notificación por carecer de presupuesto legal internacional expone a la institución a sanciones europeas masivas.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.OC-03 (Alineación con Marcos Internacionales Extraterritoriales)",
+    "official_url": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+    "text": "GDPR de la Unión Europea (Reglamento 2016/679): Establece que toda brecha de datos de residentes europeos debe ser notificada a la autoridad supervisora en un plazo máximo de 72 horas (Art. 33). Su artículo 3.2 otorga alcance extraterritorial global."
+  },
+  {
+    "id": "REG-CL-01",
+    "source": "Chile - Ley Marco de Ciberseguridad (Ley Nº 21.660 / 21.663) y CSIRT Nacional",
+    "jurisdiction": "Chile (Infraestructura Crítica / Servicios Esenciales)",
+    "category": "Ciberseguridad y Servicios Esenciales",
+    "scenario_ref": "Escenario 3 (br-cl-crossborder-retail) - Dilema 1 (br-cl-govern-01)",
+    "time_limit": "Notificación inicial obligatoria e inmediata, la cual NO debe exceder de 3 horas desde la contención técnica o conocimiento del incidente.",
+    "receiving_authority": "CSIRT Nacional (Agencia Nacional de Ciberseguridad - ANCI / Subsecretaría del Interior).",
+    "scope": "Operadores de Importancia Vital (OIV) y Proveedores de Servicios Esenciales (salud, finanzas, comercio electrónico masivo, telecomunicaciones).",
+    "articles": "Ley N° 21.660 / 21.663 Artículos de Notificación de Incidentes de Efecto Significativo; Res. Exentas de Taxonomía del CSIRT.",
+    "penalties": "Multas gravísimas que pueden alcanzar desde 15,000 hasta 40,000 UTM (Unidades Tributarias Mensuales).",
+    "operational_implications": "Chile exige un reporte de emergencia en un plazo extremadamente corto (3 horas). Si una empresa consolida datos en Brasil, la prisa por cumplir con el plazo chileno puede llevar a reportar hipótesis forenses preliminares e imprecisas.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.RM-02 (Gestión de Tiempos Críticos de Reporte e Incompatibilidad Normativa)",
+    "official_url": "https://www.bcn.cl/leychile/navegar?idNorma=1202279",
+    "text": "Ley Marco de Ciberseguridad de Chile (Ley 21.660 / 21.663): Obliga a los operadores de servicios esenciales a notificar al CSIRT Nacional cualquier incidente significativo en un plazo fatal de 3 horas. Sanciona el retardo con multas de hasta 40,000 UTM."
+  },
+  {
+    "id": "REG-BR-01",
+    "source": "Brasil - Lei Geral de Proteção de Dados (LGPD - Ley 13.709) Artículo 48",
+    "jurisdiction": "Brasil (General / Protección de Datos)",
+    "category": "Protección de Datos",
+    "scenario_ref": "Escenario 3 (br-cl-crossborder-retail) - Dilema 1 (br-cl-govern-01)",
+    "time_limit": "Plazo razonable (interpretado doctrinaria y administrativamente por la ANPD en un límite de 48 horas / 2 días hábiles).",
+    "receiving_authority": "ANPD (Autoridade Nacional de Proteção de Dados de Brasil).",
+    "scope": "Cualquier operación de tratamiento de datos personales realizada en territorio brasileño o que tenga por objeto ofrecer bienes o servicios a individuos.",
+    "articles": "Lei Nº 13.709 (LGPD) Art. 48 (Comunicación de Incidentes de Seguridad) y Art. 52 (Sanciones Administrativas).",
+    "penalties": "Multas simples de hasta el 2% de la facturación de la persona jurídica o grupo en Brasil, con un tope de 50,000,000 de Reales por infracción.",
+    "operational_implications": "Brasil exige notificar a la ANPD en un 'plazo razonable' (48h). En dilemas transfronterizos, priorizar la ventana brasileña para obtener certidumbre forense provoca el incumplimiento automático del plazo de 3 horas fijado por Chile.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.RM-02 (Ponderación de Sanciones Administrativas Transfronterizas)",
+    "official_url": "http://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm",
+    "text": "LGPD de Brasil (Ley 13.709 Art. 48): Obliga al controlador a comunicar a la ANPD y a los titulares la ocurrencia de incidentes de seguridad que puedan generar riesgo o daño relevante en un 'plazo razonable' (48 horas). Sanciones de hasta 50 millones de reales."
+  },
+  {
+    "id": "REG-BR-02",
+    "source": "Brasil - Ley N° 9.279/1996 (Propiedad Industrial / Secreto Comercial de Proveedores Cloud)",
+    "jurisdiction": "Brasil (Propiedad Industrial y Comercial)",
+    "category": "Secreto Comercial / Proveedores Nube",
+    "scenario_ref": "Escenario 3 (br-cl-crossborder-retail) - Dilema 2 (br-cl-govern-02)",
+    "time_limit": "Protección permanente del secreto comercial salvo orden judicial de exhibición.",
+    "receiving_authority": "Poder Judicial de Brasil y Consejo Administrativo de Defensa Económica (CADE).",
+    "scope": "Empresas proveedoras de servicios tecnológicos e infraestructura cloud con sede en Brasil.",
+    "articles": "Ley N° 9.279/1996 Art. 195 (Delitos de Competencia Desleal y Secreto Industrial); LGPD Art. 39 (Responsabilidad del Operador).",
+    "penalties": "Responsabilidad penal por divulgación de secreto industrial y acciones civiles de indemnización por daños a la propiedad intelectual del proveedor.",
+    "operational_implications": "Un proveedor cloud en Brasil puede respaldarse legalmente en el secreto industrial para denegar la entrega de logs crudos o volcados de memoria al CISO del cliente. Esto impide al CISO entregar una investigación completa al regulador chileno, forzándolo a asumir responsabilidad o ir a juicio en Brasil.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.RR-04 (Gestión de Riesgo de Proveedores Cloud de Terceros / Contractual Compliance)",
+    "official_url": "http://www.planalto.gov.br/ccivil_03/leis/l9279.htm",
+    "text": "Ley de Propiedad Industrial de Brasil (Ley 9.279 Art. 195): Protege el secreto comercial e industrial de las empresas. Permite a los proveedores de infraestructura negar la entrega de código fuente o archivos de sistema a terceros, creando trabas para las auditorías de incidentes."
+  },
+  {
+    "id": "REG-CL-02",
+    "source": "Chile - Ley N° 19.496 de Protección de los Derechos de los Consumidores (SERNAC)",
+    "jurisdiction": "Chile (Protección al Consumidor)",
+    "category": "Derechos del Consumidor",
+    "scenario_ref": "Escenario 3 (br-cl-crossborder-retail) - Dilema 3 (br-cl-govern-03)",
+    "time_limit": "Información inmediata y transparente ante situaciones de riesgo financiero.",
+    "receiving_authority": "SERNAC (Servicio Nacional del Consumidor de Chile) y Tribunales de Policía Local.",
+    "scope": "Proveedores de comercio electrónico y servicios financieros que interactúen con consumidores en Chile.",
+    "articles": "Ley N° 19.496 Art. 3 (Derechos fundamentales del consumidor: información veraz y oportuna) y Art. 12.",
+    "penalties": "Multas de hasta 300 UTM por infracción y demandas colectivas indemnizatorias por negligencia en la seguridad de los datos de pago.",
+    "operational_implications": "El SERNAC exige la alerta inmediata y pública a los usuarios afectados. Sin embargo, publicar la vulneración antes de aplicar el parche técnico en la base de datos de Brasil incrementa el riesgo de un ataque de imitación de otros cibercriminales.",
+    "nist_csf_mapping": "NIST CSF 2.0: GV.OC-03 / ISO 27001 A.5.26 (Divulgación Responsable vs. Protección del Consumidor)",
+    "official_url": "https://www.bcn.cl/leychile/navegar?idNorma=61438",
+    "text": "Ley N° 19.496 de Chile (SERNAC): Consagra el derecho del consumidor a recibir información veraz y oportuna sobre la seguridad de sus productos y servicios. Divulgar inmediatamente protege a los usuarios pero puede exponer el sistema a nuevos ataques antes de aplicar parches."
+  },
+  {
+    "id": "FRAMEWORK-NIST-01",
+    "source": "NIST Cybersecurity Framework 2.0 (CSF 2.0 - Governance Functions)",
+    "jurisdiction": "Estándar Internacional / Global",
+    "category": "Framework de Gobernanza",
+    "scenario_ref": "Transversal a todos los Escenarios (Dilemas 1, 2 y 3)",
+    "time_limit": "Marco metodológico continuo para la toma de decisiones estratégicas.",
+    "receiving_authority": "Junta Directiva, CISO, Comités de Riesgo y Auditoría Externa.",
+    "scope": "Cualquier organización expuesta a riesgos de ciberseguridad.",
+    "articles": "NIST CSF 2.0 Categorías: GV.RM-02 (Apetito de Riesgo), GV.RR-04 (Roles y Responsabilidades), GV.OC-03 (Requerimientos Legales y Regulatorios).",
+    "penalties": "No aplicable directamente (estándar voluntario), pero su incumplimiento se considera negligencia en auditorías corporativas y litigios.",
+    "operational_implications": "Provee el marco conceptual para estructurar la gobernanza: equilibrar apetitos de riesgo en crisis (GV.RM-02), gestionar factores humanos y sanciones no punitivas (GV.RR-04) y coordinar el cumplimiento en colisiones legislativas internacionales (GV.OC-03).",
+    "nist_csf_mapping": "NIST CSF 2.0 Core Function: GOVERN (GV)",
+    "official_url": "https://www.nist.gov/cyberframework",
+    "text": "NIST CSF 2.0 (Función GOVERN): Define los principios de gobernanza en ciberseguridad: GV.RM-02 (establecimiento de tolerancias de riesgo), GV.RR-04 (claridad en roles y responsabilidad sin sesgo punitivo) y GV.OC-03 (integración de requerimientos legales multi-jurisdiccionales)."
+  },
+  {
+    "id": "FRAMEWORK-ISO-01",
+    "source": "ISO/IEC 27001:2022 y NIST SP 800-61 Rev 2 (Incident Management)",
+    "jurisdiction": "Estándar Internacional / Global",
+    "category": "Estándares Técnicos de Incidentes",
+    "scenario_ref": "Transversal a todos los Escenarios",
+    "time_limit": "Ciclo de respuesta: Preparación, Detección, Contención, Erradicación, Recuperación, Post-Incidente.",
+    "receiving_authority": "Equipos SOC, Incident Response, Auditores de Certificación ISO.",
+    "scope": "Sistemas de Gestión de Seguridad de la Información (SGSI).",
+    "articles": "ISO/IEC 27001:2022 Controles A.5.24, A.5.26, A.5.34, A.7.2; NIST SP 800-61 Rev 2 Sección 3.",
+    "penalties": "Pérdida de certificación ISO 27001 y hallazgos mayores en auditorías de cumplimiento.",
+    "operational_implications": "Exige documentar rigurosamente el análisis forense, mantener cadena de custodia y desvincular los plazos de contención técnica de los plazos regulatorios de notificación, asegurando lecciones aprendidas.",
+    "nist_csf_mapping": "NIST CSF 2.0: RS.MA-01 (Manejo de Incidentes) y RC.RP-01 (Planes de Recuperación)",
+    "official_url": "https://csrc.nist.gov/publications/detail/sp/800-61/rev-2/final",
+    "text": "ISO/IEC 27001:2022 y NIST SP 800-61 Rev 2: Definen las mejores prácticas internacionales de gestión de incidentes. Exigen la separación de fases (análisis, contención, notificación) y la implementación de controles organizativos para preservar evidencias y continuidad."
+  }
 ];
 
 // Ground Truth (Casos del Experimento)
@@ -222,8 +458,7 @@ const SCENARIOS = {
 // Respuestas de IA Simuladas para el Modo Demo
 const MOCK_IA_RESPONSES = {
     "1": {
-        "groupB": `--- DICTAMEN DE IA BÁSICA (SIN VALIDADOR - SIMULADO) ---
-[VEREDICTO] RECHAZADO: La propuesta del operador de postergar la notificación oficial al Banco Central del Uruguay (BCU) para evitar pánico de mercado infringe gravemente la Circular 2318.
+        "groupB": `[VEREDICTO] RECHAZADO: La propuesta del operador de postergar la notificación oficial al Banco Central del Uruguay (BCU) para evitar pánico de mercado infringe gravemente la Circular 2318.
 
 [FUNDAMENTACIÓN LEGAL]
 - Bajo la normativa de regulación y control del sistema financiero del BCU, las entidades reguladas deben reportar incidentes calificados como críticos en un plazo máximo e improrrogable de 24 horas contadas a partir de la detección o sospecha razonable del evento.
@@ -232,8 +467,8 @@ const MOCK_IA_RESPONSES = {
 [RECOMENDACIÓN]
 - Proceder de forma inmediata a la comunicación preliminar del incidente de seguridad al BCU, manteniendo el canal abierto de soporte técnico para complementar la información conforme avance el análisis forense.`,
         "groupC": {
-            "evaluacion": "RECHAZADO (DEMO MULTI-AGENTE)",
-            "explicacion": "El dictamen de auditoría multi-agente valida y corrobora de forma estricta las normativas financieras de Uruguay. La decisión del operador de postergar el reporte al Banco Central de Uruguay (BCU) viola la Circular 2318 (plazo límite de 24 horas).",
+            "evaluacion": "RECHAZADO (INCUMPLIMIENTO NORMATIVO DETECTADO)",
+            "explicacion": "El dictamen de auditoría valida y corrobora de forma estricta las normativas financieras de Uruguay. La decisión del operador de postergar el reporte al Banco Central de Uruguay (BCU) viola la Circular 2318 (plazo límite de 24 horas).",
             "mejor_practica": "Ejecutar la notificación inicial formal al BCU inmediatamente (dentro de las 24 horas). Utilizar plantillas estandarizadas de reporte preliminar de incidentes críticos.",
             "fuentes_citadas": ["Uruguay BCU Circular 2318 (Circular_2318_Uruguay_Finanzas.pdf)", "ISO/IEC 27001:2022 Control A.5.34"],
             "costo_estimado": 0.00340,
@@ -243,8 +478,7 @@ const MOCK_IA_RESPONSES = {
         }
     },
     "2": {
-        "groupB": `--- DICTAMEN DE IA BÁSICA (SIN VALIDADOR - SIMULADO) ---
-[VEREDICTO] APROBADO: La propuesta del operador de notificar a la Secretaría de Salud y al INAI inmediatamente a las 12 horas del incidente cumple holgadamente con los plazos establecidos.
+        "groupB": `[VEREDICTO] APROBADO: La propuesta del operador de notificar a la Secretaría de Salud y al INAI inmediatamente a las 12 horas del incidente cumple holgadamente con los plazos establecidos.
 
 [FUNDAMENTACIÓN LEGAL]
 - Según la NOM-004-SSA3-2012 y la Ley General de Protección de Datos Personales en Posesión de Sujetos Obligados (LGPDPPSO), el plazo máximo para notificar brechas que comprometan expedientes clínicos es de 72 horas hábiles contadas a partir del conocimiento del incidente.
@@ -253,7 +487,7 @@ const MOCK_IA_RESPONSES = {
 [RECOMENDACIÓN]
 - Proceder con la notificación planificada al INAI y a los titulares afectados, asegurando el bloqueo de las credenciales de urgencia comprometidas y documentando las lecciones aprendidas.`,
         "groupC": {
-            "evaluacion": "APROBADO (DEMO MULTI-AGENTE)",
+            "evaluacion": "APROBADO (CUMPLIMIENTO NORMATIVO VERIFICADO)",
             "explicacion": "Se valida que el reporte inmediato a las 12 horas cumple cabalmente con la NOM-004-SSA3-2012 y la LGPDPPSO de México, las cuales otorgan una ventana de hasta 72 horas hábiles. Cero alucinaciones detectadas.",
             "mejor_practica": "Continuar con la notificación formal a los titulares de datos de salud y documentar las medidas correctivas aplicadas a las cuentas de correo institucional comprometidas.",
             "fuentes_citadas": ["México NOM-004-SSA3-2012 (NOM_004_SSA3_Expediente_Clinico.pdf)", "LGPDPPSO Título Noveno, Artículos de Infracciones"],
@@ -264,8 +498,7 @@ const MOCK_IA_RESPONSES = {
         }
     },
     "3": {
-        "groupB": `--- DICTAMEN DE IA BÁSICA (SIN VALIDADOR - SIMULADO) ---
-[VEREDICTO] RECHAZADO: La propuesta del operador de posponer el informe al CSIRT de Chile para realizar un análisis de colisión legal transfronterizo en Brasil es inválida y viola los plazos legales.
+        "groupB": `[VEREDICTO] RECHAZADO: La propuesta del operador de posponer el informe al CSIRT de Chile para realizar un análisis de colisión legal transfronterizo en Brasil es inválida y viola los plazos legales.
 
 [FUNDAMENTACIÓN LEGAL]
 - De acuerdo con la Ley Marco de Ciberseguridad de Chile (Ley Nº 21.660), los operadores de infraestructura crítica de la información y proveedores de servicios esenciales deben notificar los incidentes significativos de forma inmediata, en un plazo que no exceda las 3 horas de su contención o conocimiento.
@@ -274,8 +507,8 @@ const MOCK_IA_RESPONSES = {
 [RECOMENDACIÓN]
 - Proceder con el reporte de emergencia al CSIRT de Chile inmediatamente antes de cumplirse el plazo límite de 3 horas, y de forma paralela notificar a la ANPD en Brasil dentro de su ventana razonable (48-72h).`,
         "groupC": {
-            "evaluacion": "RECHAZADO (DEMO MULTI-AGENTE)",
-            "explicacion": "El motor multi-agente determinó que la propuesta del operador de posponer el informe en Chile viola el Artículo de Notificaciones de la Ley Marco de Ciberseguridad de Chile (Ley Nº 21.660), que impone un plazo fatal e improrrogable de 3 horas.",
+            "evaluacion": "RECHAZADO (INCUMPLIMIENTO NORMATIVO DETECTADO)",
+            "explicacion": "El dictamen determinó que la propuesta del operador de posponer el informe en Chile viola el Artículo de Notificaciones de la Ley Marco de Ciberseguridad de Chile (Ley Nº 21.660), que impone un plazo fatal e improrrogable de 3 horas.",
             "mejor_practica": "Ejecutar la alerta temprana de 3 horas en Chile e iniciar la investigación paralela de impacto para la ANPD brasileña de acuerdo al Art. 48 de la LGPD.",
             "fuentes_citadas": ["Chile Ley Marco de Ciberseguridad Ley 21.660 (Ley_Marco_CSIRT_Chile.pdf)", "Brasil LGPD Art. 48"],
             "costo_estimado": 0.00410,
@@ -387,31 +620,39 @@ function showPhase(phaseNum) {
     if (phaseNum === 2) {
         const assignedRunContainer = document.getElementById("assigned-run-container");
         const manualScenariosContainer = document.getElementById("manual-scenarios-container");
-        if (appState.isDemoMode) {
-            assignedRunContainer.classList.add("hidden");
-            manualScenariosContainer.classList.remove("hidden");
-        } else {
-            assignedRunContainer.classList.remove("hidden");
-            manualScenariosContainer.classList.add("hidden");
-            
-            // Asignar parámetros según la matriz de contrabalanceo
-            const { group, scenarioId } = getExperimentParameters(appState.startingGroup, appState.runNumber);
-            appState.activeGroup = group;
-            appState.selectedScenarioId = scenarioId;
-            
-            const scenario = SCENARIOS[scenarioId];
-            
-            document.getElementById("assigned-run-subtitle").innerText = `CORRIDA ${appState.runNumber} DE 3`;
-            document.getElementById("assigned-run-title").innerText = scenario.title;
-            
-            let groupLabel = "Grupo C: Motor Multi-Agente";
-            if (group === "A") groupLabel = "Grupo A: Búsqueda Manual";
-            if (group === "B") groupLabel = "Grupo B: IA Básica";
-            
-            document.getElementById("assigned-run-details").innerHTML = `
-                <strong>Caso / Tipo:</strong> ${scenario.type}<br>
-                <strong>Jurisdicción:</strong> ${scenario.jurisdiction}<br>
-                <strong>Soporte tecnológico asignado:</strong> ${groupLabel}
+        
+        // Siempre mostrar la asignación automática por Matriz de Contrabalanceo Latino
+        if (assignedRunContainer) assignedRunContainer.classList.remove("hidden");
+        if (manualScenariosContainer) manualScenariosContainer.classList.add("hidden");
+        
+        if (!appState.startingGroup) {
+            appState.startingGroup = 'A';
+        }
+        
+        // Asignar parámetros estrictos según la matriz de contrabalanceo
+        const { group, scenarioId } = getExperimentParameters(appState.startingGroup, appState.runNumber);
+        appState.activeGroup = group;
+        appState.selectedScenarioId = scenarioId;
+        
+        const scenario = SCENARIOS[scenarioId];
+        
+        const subtitleEl = document.getElementById("assigned-run-subtitle");
+        const titleEl = document.getElementById("assigned-run-title");
+        const detailsEl = document.getElementById("assigned-run-details");
+
+        if (subtitleEl) subtitleEl.innerText = `CORRIDA ${appState.runNumber} DE 3 ${appState.isDemoMode ? '(MODO DEMO)' : ''}`;
+        if (titleEl) titleEl.innerText = scenario.title;
+        
+        // Protocolo de Ciego Único: Mostrar etiqueta neutra al participante sin revelar el grupo experimental
+        let groupLabel = appState.isDemoMode 
+            ? `Entorno de Auditoría Habilitado (Condición ${group})` 
+            : `Entorno de Auditoría y Soporte Habilitado`;
+        
+        if (detailsEl) {
+            detailsEl.innerHTML = `
+                <strong>Caso Asignado:</strong> ${scenario.title} (${scenario.type})<br>
+                <strong>Jurisdicción Afundada:</strong> ${scenario.jurisdiction}<br>
+                <strong>Herramienta Experimental:</strong> <span style="color: var(--primary); font-weight: 600;">${groupLabel}</span>
             `;
         }
     }
@@ -437,6 +678,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     let urlGroup = urlParams.get('group');
     const isProduction = urlParams.get('production') === 'true';
+    appState.isProduction = isProduction;
 
     // Normalizar grupo
     if (urlGroup) {
@@ -482,12 +724,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Rellenar visualmente los campos en Fase 1 por consistencia
-        document.getElementById("access-code").value = appState.accessCode;
-        document.getElementById("participant-id").value = appState.participantId;
-        document.getElementById("participant-experience").value = appState.experience;
-        document.getElementById("gemini-key").value = appState.geminiApiKey;
-        document.getElementById("groq-key").value = appState.groqApiKey;
-        document.getElementById("openrouter-key").value = appState.openrouterApiKey;
+        const elAcc = document.getElementById("access-code"); if (elAcc) elAcc.value = appState.accessCode;
+        const elPart = document.getElementById("participant-id"); if (elPart) elPart.value = appState.participantId;
+        const elExp = document.getElementById("participant-experience"); if (elExp) elExp.value = appState.experience;
+        const elGem = document.getElementById("gemini-key"); if (elGem) elGem.value = appState.geminiApiKey;
+        const elGroq = document.getElementById("groq-key"); if (elGroq) elGroq.value = appState.groqApiKey;
+        const elOpenR = document.getElementById("openrouter-key"); if (elOpenR) elOpenR.value = appState.openrouterApiKey;
 
         // Redirigir a la fase en la que se quedó el participante
         const currentPhase = parseInt(sessionStorage.getItem("currentPhase") || "2", 10);
@@ -505,52 +747,40 @@ document.addEventListener("DOMContentLoaded", () => {
         showPhase(currentPhase);
     }
 
-    // Botón de generación de alias único
-    const generateBtn = document.getElementById("btn-generate-alias");
-    if (generateBtn) {
-        generateBtn.addEventListener("click", () => {
-            const randomHex = Math.floor(4096 + Math.random() * 61439).toString(16).toUpperCase();
-            const alias = `CISO-${randomHex}`;
-            document.getElementById("participant-id").value = alias;
-            appState.participantId = alias;
-            console.log(`[Alias] Generado alias único: ${alias}`);
-        });
+    // El botón Modo Demo está habilitado por defecto para entorno local / investigación
+    const btnDemo = document.getElementById("btn-demo-mode");
+    if (btnDemo) {
+        if (isProduction) {
+            btnDemo.classList.add("hidden");
+        } else {
+            btnDemo.classList.remove("hidden");
+        }
     }
 
-    // Fase 1 -> Fase 2 (con Validación de Código)
+    // Fase 1 -> Fase 2 (Validación Estricta de Código Único de Firebase)
     document.getElementById("btn-to-phase-2").addEventListener("click", async () => {
         appState.isDemoMode = false;
         
         const accessCodeInput = document.getElementById("access-code").value.trim().toUpperCase();
         if (!accessCodeInput) {
-            alert("Por favor, ingrese su Código de Acceso de un Solo Uso.");
-            return;
-        }
-        
-        const idInput = document.getElementById("participant-id").value.trim();
-        if (!idInput) {
-            alert("Por favor, ingrese o genere su Código de Identificación de Participante (Alias).");
-            return;
-        }
-        
-        const expSelect = document.getElementById("participant-experience");
-        if (!expSelect.value) {
-            alert("Por favor, seleccione su nivel de experiencia antes de comenzar.");
+            alert("Por favor, ingrese su Código de Acceso de un Solo Uso recibido por correo.");
             return;
         }
         
         const btnStart = document.getElementById("btn-to-phase-2");
         const originalText = btnStart.innerHTML;
         btnStart.disabled = true;
-        btnStart.innerText = "Validando código...";
+        btnStart.innerText = "Validando código en Firebase...";
         
         try {
+            let perfilExp = "Perfil Verificado en Registro";
+
             if (isFirebaseAvailable && db) {
                 const docRef = db.collection("codigos_acceso").doc(accessCodeInput);
                 const docSnap = await docRef.get();
                 
                 if (!docSnap.exists) {
-                    alert("El código de acceso introducido no es válido. Verifique con el investigador.");
+                    alert("El código de acceso introducido no es válido. Verifique con el equipo de investigación de INFOTEC.");
                     btnStart.disabled = false;
                     btnStart.innerHTML = originalText;
                     return;
@@ -558,36 +788,72 @@ document.addEventListener("DOMContentLoaded", () => {
                 
                 const data = docSnap.data();
                 if (data.usado === true) {
-                    alert("Este código de acceso ya ha sido utilizado. Si su sesión se interrumpió, solicite un nuevo código al investigador.");
+                    alert("Este código de acceso ya fue utilizado para realizar la evaluación. Si su sesión se interrumpió, contacte al equipo de investigación.");
                     btnStart.disabled = false;
                     btnStart.innerHTML = originalText;
                     return;
                 }
                 
-                // Quemar el código
+                // Obtener perfil y experiencia vinculados en solicitudes_convocatoria si existe el ID
+                if (data.candidato_id) {
+                    try {
+                        const candSnap = await db.collection("solicitudes_convocatoria").doc(data.candidato_id).get();
+                        if (candSnap.exists) {
+                            const candData = candSnap.data();
+                            perfilExp = `${candData.perfil || 'CISO'} | ${candData.experiencia || 'Experiencia Registrada'}`;
+                        }
+                    } catch (e) {
+                        console.warn("⚠️ No se pudo obtener el perfil extendido del candidato, usando valores por defecto:", e);
+                    }
+                } else if (data.perfil) {
+                    perfilExp = data.perfil;
+                }
+
+                // Quemar el código de un solo uso en Firebase
                 await docRef.update({
                     usado: true,
-                    participante: idInput,
                     fecha_uso: new Date().toISOString()
                 });
-                console.log(`✓ [Firebase] Código de acceso ${accessCodeInput} validado y quemado con éxito.`);
+                console.log(`✓ [Firebase] Código de acceso ${accessCodeInput} validado y marcado como usado.`);
             } else {
-                console.warn("⚠️ [Firebase] Omitiendo validación en el servidor por estar fuera de línea.");
+                console.warn("⚠️ [Firebase] Omitiendo validación remota por estar en modo local o fuera de línea.");
             }
             
-            // Cargar datos
+            // Cargar datos en el estado del experimento
             appState.accessCode = accessCodeInput;
-            appState.participantId = idInput;
-            appState.experience = expSelect.value;
+            appState.participantId = accessCodeInput; // El código de acceso actúa como identificador único anónimo
+            appState.experience = perfilExp;
             
-            appState.geminiApiKey = document.getElementById("gemini-key").value.trim();
-            appState.groqApiKey = document.getElementById("groq-key").value.trim();
-            appState.openrouterApiKey = document.getElementById("openrouter-key").value.trim();
+            // Actualizar dinámicamente las instrucciones según el perfil (CISO vs Derecho)
+            const titleEl = document.getElementById("instruction-role-title");
+            const descEl = document.getElementById("instruction-role-desc");
+
+            if (titleEl && descEl) {
+                const lowerPerfil = perfilExp.toLowerCase();
+                if (lowerPerfil.includes("mixto")) {
+                    titleEl.innerText = "Instrucciones del Participante (Rol: Perfil Mixto - Gobernanza & Legal)";
+                    descEl.innerText = "Usted asumirá la postura integrada de CISO y Asesor Legal para auditar la validez jurídica, la responsabilidad normativa y la contención operativa de la propuesta del operador ante incidentes críticos.";
+                } else if (lowerPerfil.includes("derecho") || lowerPerfil.includes("legal")) {
+                    titleEl.innerText = "Instrucciones del Participante (Rol: Asesor Legal / Compliance)";
+                    descEl.innerText = "Usted asumirá la postura de Auditor de Derecho Digital y Cumplimiento Regulatorio para evaluar la validez jurídica, la responsabilidad legal y el apego normativo de la propuesta del operador ante incidentes críticos.";
+                } else {
+                    titleEl.innerText = "Instrucciones del Participante (Rol: CISO / Director de Seguridad)";
+                    descEl.innerText = "Usted asumirá la postura de Director de Seguridad de la Información (CISO) para auditar y validar decisiones técnicas y operativas de reporte ante incidentes críticos.";
+                }
+            }
+            
+            const geminiKeyEl = document.getElementById("gemini-key");
+            const groqKeyEl = document.getElementById("groq-key");
+            const openrouterKeyEl = document.getElementById("openrouter-key");
+
+            appState.geminiApiKey = geminiKeyEl ? geminiKeyEl.value.trim() : "";
+            appState.groqApiKey = groqKeyEl ? groqKeyEl.value.trim() : "";
+            appState.openrouterApiKey = openrouterKeyEl ? openrouterKeyEl.value.trim() : "";
             
             showPhase(2);
         } catch (error) {
             console.error("❌ Error de validación en Firebase:", error);
-            alert(`Error de red al validar el código: ${error.message}. Contacte al investigador.`);
+            alert(`Error de conexión al validar el código: ${error.message}. Verifique su conexión o contacte al investigador.`);
         } finally {
             btnStart.disabled = false;
             btnStart.innerHTML = originalText;
@@ -605,18 +871,34 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Modo Demo
+    // Modo Demo (Para pruebas del investigador)
     const demoBtn = document.getElementById("btn-demo-mode");
     if (demoBtn) {
         demoBtn.addEventListener("click", () => {
+            sessionStorage.clear();
+            
             appState.isDemoMode = true;
+            appState.runNumber = 1;
+            appState.startingGroup = 'A';
+            appState.activeGroup = 'A';
+            appState.selectedScenarioId = '1';
             appState.participantId = "CISO-DEMO-SIMULADO";
-            appState.experience = "Avanzado";
-            document.getElementById("participant-id").value = "CISO-DEMO-SIMULADO";
-            document.getElementById("participant-experience").value = "Avanzado";
-            document.getElementById("gemini-key").value = "••••••••••••••••";
-            document.getElementById("groq-key").value = "••••••••••••••••";
-            document.getElementById("openrouter-key").value = "••••••••••••••••";
+            appState.experience = "Perfil Mixto - Avanzado (Demo)";
+            appState.csvLogs = [];
+            appState.answers = {};
+            appState.quizScore = 0;
+            appState.iaLatency = 0;
+            appState.stopwatchElapsed = 0;
+            
+            const gKey = document.getElementById("gemini-key");
+            const grKey = document.getElementById("groq-key");
+            const orKey = document.getElementById("openrouter-key");
+
+            if (gKey) gKey.value = "••••••••••••••••";
+            if (grKey) grKey.value = "••••••••••••••••";
+            if (orKey) orKey.value = "••••••••••••••••";
+            
+            setupExperimentalUI(appState.activeGroup, isProduction);
             showPhase(2);
         });
     }
@@ -643,10 +925,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Grupo A: Buscador Manual
-    document.getElementById("btn-manual-search").addEventListener("click", executeManualSearch);
+    // Grupo A: Buscador Manual y Filtros por Jurisdicción
+    document.getElementById("btn-manual-search").addEventListener("click", () => executeManualSearch());
     document.getElementById("manual-search-input").addEventListener("keypress", (e) => {
         if (e.key === "Enter") executeManualSearch();
+    });
+
+    document.querySelectorAll("#jurisdiction-filters .pill-btn").forEach(pill => {
+        pill.addEventListener("click", (e) => {
+            document.querySelectorAll("#jurisdiction-filters .pill-btn").forEach(p => p.classList.remove("active"));
+            e.target.classList.add("active");
+            const filterCategory = e.target.getAttribute("data-filter");
+            executeManualSearch(filterCategory);
+        });
     });
 
     // Grupo B: Consulta Directa
@@ -668,63 +959,22 @@ document.addEventListener("DOMContentLoaded", () => {
         evaluateQuiz();
     });
 
-    // Fase 5: Descarga de Resultados
-    document.getElementById("btn-download-csv").addEventListener("click", () => {
-        if (appState.activeGroup === "B" || appState.activeGroup === "C") {
-            const selectedRating = document.querySelector('input[name="trust-rating"]:checked');
-            if (!selectedRating) {
-                alert("Por favor, seleccione una calificación de confianza en la escala Likert antes de descargar el CSV.");
-                return;
-            }
-        }
-        downloadCSV();
-    });
+    // Fase 5: Descarga de Resúmenes de Cumplimiento
+    const btnDownloadSummaries = document.getElementById("btn-download-summaries");
+    if (btnDownloadSummaries) {
+        btnDownloadSummaries.addEventListener("click", () => {
+            downloadCSV();
+        });
+    }
 
-    // Reiniciar / Avanzar Corrida
-    document.getElementById("btn-restart").addEventListener("click", () => {
-        if (appState.activeGroup === "B" || appState.activeGroup === "C") {
-            const selectedRating = document.querySelector('input[name="trust-rating"]:checked');
-            if (!selectedRating) {
-                alert("Por favor, seleccione una calificación de confianza en la escala Likert antes de continuar.");
-                return;
-            }
-        }
-        
-        // Si no es modo demo y completó las 3 corridas, bloquear el reinicio
-        if (!appState.isDemoMode && appState.runNumber >= 3) {
-            alert("Ha completado las 3 corridas del experimento. Por favor, descargue su reporte de resultados final (.csv).");
-            return;
-        }
-
-        appState.answers = {};
-        appState.quizScore = 0;
-        appState.iaLatency = 0;
-        appState.stopwatchElapsed = 0;
-        appState.selectedJustification = null;
-        appState.tempJustification = null;
-        document.getElementById("manual-search-input").value = "";
-        document.getElementById("manual-search-results").innerHTML = '<div class="no-results">Realice una búsqueda para consultar la base de datos regulatoria.</div>';
-        
-        // Ocultar paneles de respuestas anteriores
-        document.getElementById("group-b-response-container").classList.add("hidden");
-        document.getElementById("group-c-response-container").classList.add("hidden");
-        document.getElementById("btn-to-phase-4").disabled = true;
-
-        if (!appState.isDemoMode) {
-            // Avanzar a la siguiente corrida
-            appState.runNumber += 1;
-            
-            // Recalcular parámetros según la matriz de contrabalanceo Latino
-            const { group, scenarioId } = getExperimentParameters(appState.startingGroup, appState.runNumber);
-            appState.activeGroup = group;
-            appState.selectedScenarioId = scenarioId;
-        }
-
-        // Mantener el control experimental al reiniciar
-        setupExperimentalUI(appState.activeGroup, isProduction);
-
-        showPhase(2);
-    });
+    // Fase 5: Terminar y Salir
+    const btnFinishExit = document.getElementById("btn-finish-and-exit");
+    if (btnFinishExit) {
+        btnFinishExit.addEventListener("click", () => {
+            sessionStorage.clear();
+            location.reload();
+        });
+    }
 
     // Confirmar Justificación (Pausa de Gobernanza)
     const btnSubmitJust = document.getElementById("btn-submit-justification");
@@ -745,8 +995,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // CONFIGURACIÓN DINÁMICA DEL ESCENARIO
 function setupScenario(id) {
+    appState.selectedScenarioId = String(id);
     const scenario = SCENARIOS[id];
-    document.getElementById("active-scenario-display").innerText = `Caso Activo: ${id}`;
+    const activeDisplay = document.getElementById("active-scenario-display");
+    if (activeDisplay) activeDisplay.innerText = `Corrida ${appState.runNumber} de 3 | Escenario Activo: ${id}`;
+    
+    const expTitle = document.getElementById("experiment-title");
+    if (expTitle) expTitle.innerText = `Fase 3: Soporte y Auditoría de Decisión (Corrida ${appState.runNumber} de 3)`;
+
     document.getElementById("dilemma-text").innerText = scenario.dilema;
     document.getElementById("operator-decision-text").innerText = scenario.decision;
     
@@ -755,6 +1011,16 @@ function setupScenario(id) {
         document.getElementById("culture-title").innerText = scenario.ethicalCulture.title;
         document.getElementById("culture-desc").innerText = scenario.ethicalCulture.description;
     }
+
+    // Resetear píldora activa al filtro "Del Escenario Activo"
+    const scenarioPill = document.querySelector("#jurisdiction-filters .pill-btn[data-filter='active_scenario']");
+    if (scenarioPill) {
+        document.querySelectorAll("#jurisdiction-filters .pill-btn").forEach(p => p.classList.remove("active"));
+        scenarioPill.classList.add("active");
+    }
+
+    // Cargar de forma predeterminada las regulaciones filtradas para el escenario activo
+    executeManualSearch("active_scenario");
 }
 
 // CRONÓMETRO INVISIBLE (Hawthorne Effect Mitigation)
@@ -769,43 +1035,137 @@ function stopStopwatch() {
     console.log(`⏱️ [Stopwatch] Cronómetro detenido. Latencia humana: ${appState.stopwatchElapsed.toFixed(2)}s`);
 }
 
-// GRUPO A: BÚSQUEDA VECTORIAL ESTÁTICA LOCAL
-function executeManualSearch() {
-    const query = document.getElementById("manual-search-input").value.trim().toLowerCase();
+// GRUPO A: BÚSQUEDA VECTORIAL / MANUAL LOCAL ENRIQUECIDA
+function executeManualSearch(filterCategory = null) {
+    const queryInput = document.getElementById("manual-search-input");
+    const query = queryInput ? queryInput.value.trim().toLowerCase() : "";
     const resultsContainer = document.getElementById("manual-search-results");
     
-    if (!query) {
-        resultsContainer.innerHTML = '<div class="no-results">Ingrese un término para buscar.</div>';
-        return;
+    // Obtener la categoría del botón activo si no se especificó un parámetro directo
+    if (!filterCategory) {
+        const activePill = document.querySelector("#jurisdiction-filters .pill-btn.active");
+        if (activePill) filterCategory = activePill.getAttribute("data-filter");
     }
 
-    // Coincidencia simple de palabras clave para simular el buscador manual
+    if (!appState.regulatoryDatabase || appState.regulatoryDatabase.length === 0) {
+        appState.regulatoryDatabase = FALLBACK_REGULATORY_DATABASE;
+    }
+
     let results = [];
+
     appState.regulatoryDatabase.forEach(doc => {
-        if (doc.source.toLowerCase().includes(query) || doc.text.toLowerCase().includes(query)) {
+        const fullContent = `
+            ${doc.source || ""} ${doc.text || ""} ${doc.jurisdiction || ""} 
+            ${doc.category || ""} ${doc.articles || ""} ${doc.operational_implications || ""} 
+            ${doc.penalties || ""} ${doc.nist_csf_mapping || ""} ${doc.scenario_ref || ""}
+        `.toLowerCase();
+
+        let matchesFilter = true;
+        if (filterCategory && filterCategory !== "all") {
+            const filterLower = filterCategory.toLowerCase();
+            
+            if (filterLower === "active_scenario") {
+                const activeNum = String(appState.selectedScenarioId || "1");
+                const scenarioRefLower = (doc.scenario_ref || "").toLowerCase();
+                const docId = (doc.id || "").toUpperCase();
+
+                if (activeNum === "1") {
+                    matchesFilter = docId.startsWith("REG-UY") || docId.startsWith("REG-AR") || docId.startsWith("FRAMEWORK") || scenarioRefLower.includes("escenario 1") || scenarioRefLower.includes("transversal");
+                } else if (activeNum === "2") {
+                    matchesFilter = docId.startsWith("REG-MX") || docId.startsWith("REG-US") || docId.startsWith("REG-EU") || docId.startsWith("FRAMEWORK") || scenarioRefLower.includes("escenario 2") || scenarioRefLower.includes("transversal");
+                } else if (activeNum === "3") {
+                    matchesFilter = docId.startsWith("REG-CL") || docId.startsWith("REG-BR") || docId.startsWith("FRAMEWORK") || scenarioRefLower.includes("escenario 3") || scenarioRefLower.includes("transversal");
+                }
+            } else if (filterLower === "transfronterizo") {
+                matchesFilter = fullContent.includes("transfronteriz") || fullContent.includes("ee.uu") || fullContent.includes("ue") || fullContent.includes("gdpr") || fullContent.includes("hipaa") || fullContent.includes("argentina");
+            } else if (filterLower === "framework") {
+                matchesFilter = fullContent.includes("framework") || fullContent.includes("nist") || fullContent.includes("iso");
+            } else {
+                matchesFilter = (doc.jurisdiction && doc.jurisdiction.toLowerCase().includes(filterLower)) || fullContent.includes(filterLower);
+            }
+        }
+
+        let matchesQuery = true;
+        if (query) {
+            matchesQuery = fullContent.includes(query);
+        }
+
+        if (matchesFilter && matchesQuery) {
             results.push(doc);
         }
     });
 
-    // Fallback si no hay coincidencias
-    if (results.length === 0) {
-        // Devolver leyes generales del dataset
-        results = appState.regulatoryDatabase.slice(-2);
+    // Fallback si la búsqueda por palabra clave no retorna nada: mostrar resultados generales sugeridos
+    if (results.length === 0 && query) {
+        resultsContainer.innerHTML = `<div class="no-results">⚠️ No se encontraron coincidencias exactas para "${query}". Mostrando sugerencias normativas generales:</div>`;
+        results = appState.regulatoryDatabase.slice(0, 4);
+    } else {
+        resultsContainer.innerHTML = "";
     }
 
-    resultsContainer.innerHTML = "";
+    if (results.length === 0) {
+        resultsContainer.innerHTML = `<div class="no-results">No hay registros normativos disponibles para el filtro seleccionado.</div>`;
+        return;
+    }
+
     results.forEach((doc, idx) => {
         const card = document.createElement("div");
         card.className = "law-card";
+        
+        let badgeClass = "framework";
+        const jur = (doc.jurisdiction || "").toLowerCase();
+        if (jur.includes("uruguay")) badgeClass = "uruguay";
+        else if (jur.includes("méxico") || jur.includes("mexico")) badgeClass = "mexico";
+        else if (jur.includes("brasil")) badgeClass = "brasil";
+        else if (jur.includes("chile")) badgeClass = "chile";
+        else if (jur.includes("estados unidos") || jur.includes("unión europea") || jur.includes("argentina") || jur.includes("transfronterizo")) badgeClass = "transfronterizo";
+
+        const badgeText = doc.jurisdiction || "NORMA GENERAL";
+
         card.innerHTML = `
-            <h4>Documento [${idx + 1}]: ${doc.source}</h4>
-            <p>${doc.text}</p>
+            <div class="law-card-header">
+                <h4>[Regulación ${idx + 1}]: ${doc.source}</h4>
+                <span class="law-badge ${badgeClass}">${badgeText}</span>
+            </div>
+            
+            <div class="law-meta-grid">
+                <div class="law-meta-item"><strong>⏱️ Plazo de Notificación:</strong> ${doc.time_limit || "No especificado"}</div>
+                <div class="law-meta-item"><strong>🏛️ Autoridad Competente:</strong> ${doc.receiving_authority || "No especificada"}</div>
+                <div class="law-meta-item"><strong>⚖️ Artículos / Base Legal:</strong> ${doc.articles || "No especificados"}</div>
+                <div class="law-meta-item"><strong>🛡️ Alineación NIST/ISO:</strong> ${doc.nist_csf_mapping || "No mapeado"}</div>
+            </div>
+
+            ${doc.operational_implications ? `
+                <div class="law-card-section">
+                    <label>💡 Implicaciones Operativas y Dilema CISO:</label>
+                    <p>${doc.operational_implications}</p>
+                </div>
+            ` : ""}
+
+            ${doc.penalties ? `
+                <div class="law-card-section">
+                    <label>⚠️ Sanciones y Multas por Incumplimiento:</label>
+                    <p style="color: #fca5a5;">${doc.penalties}</p>
+                </div>
+            ` : ""}
+
+            <div class="law-card-section">
+                <label>📄 Síntesis Legal:</label>
+                <p>${doc.text}</p>
+            </div>
+
+            ${doc.official_url ? `
+                <a href="${doc.official_url}" target="_blank" rel="noopener noreferrer" class="law-link">
+                    🌐 Consultar Fuente Oficial / Texto Consolidado &rarr;
+                </a>
+            ` : ""}
         `;
         resultsContainer.appendChild(card);
     });
 
     // Habilitar avance a cuestionario
-    document.getElementById("btn-to-phase-4").disabled = false;
+    const btnToPhase4 = document.getElementById("btn-to-phase-4");
+    if (btnToPhase4) btnToPhase4.disabled = false;
 }
 
 // GRUPO B: ASISTENTE DE IA SIMPLE (LLAMADA DIRECTA)
@@ -1021,11 +1381,6 @@ async function executeGroupC() {
     document.getElementById("group-c-verdict").innerText = "Procesando...";
     document.getElementById("group-c-explanation").innerText = "El motor de agentes está consultando el RAG y validando alucinaciones...";
     document.getElementById("group-c-practices").innerText = "Por favor espere...";
-    document.getElementById("group-c-approved").innerText = "--";
-    document.getElementById("group-c-score").innerText = "--";
-    document.getElementById("group-c-cost").innerText = "--";
-    document.getElementById("group-c-tokens").innerText = "--";
-    document.getElementById("group-c-sources-list").innerHTML = "";
 
     const scenario = SCENARIOS[appState.selectedScenarioId];
 
@@ -1039,21 +1394,8 @@ async function executeGroupC() {
         document.getElementById("group-c-explanation").innerText = data.explicacion || "";
         document.getElementById("group-c-practices").innerText = data.mejor_practica || "";
         
-        const approvedSpan = document.getElementById("group-c-approved");
-        approvedSpan.innerText = "🟢 APROBADO (Modo Demo Simulado - Cero alucinaciones)";
-        
-        document.getElementById("group-c-score").innerText = `${data.score_tecnico}%`;
-        document.getElementById("group-c-cost").innerText = `$${(data.costo_estimado).toFixed(5)} USD`;
-        document.getElementById("group-c-tokens").innerText = `${data.total_tokens} tokens`;
-
-        // Fuentes
-        const sourcesList = document.getElementById("group-c-sources-list");
-        sourcesList.innerHTML = "";
-        data.fuentes_citadas.forEach(src => {
-            const li = document.createElement("li");
-            li.innerText = src;
-            sourcesList.appendChild(li);
-        });
+        appState.lastGroupCExplanation = data.explicacion;
+        appState.lastGroupCBestPractices = data.mejor_practica;
 
         runBtn.disabled = false;
         document.getElementById("btn-to-phase-4").disabled = false;
@@ -1100,10 +1442,6 @@ async function executeGroupC() {
         document.getElementById("group-c-verdict").innerHTML = '<span style="color: var(--color-danger);">❌ ERROR DE CONEXIÓN</span>';
         document.getElementById("group-c-explanation").innerText = `El motor de agentes multi-agente no pudo comunicarse con el servidor remoto debido al siguiente error: ${e.message}. \n\nPor favor, verifique su conexión a internet, espere unos segundos y vuelva a presionar "Consultar Motor" para reintentar.`;
         document.getElementById("group-c-practices").innerText = "No disponible debido al fallo de conexión.";
-        document.getElementById("group-c-approved").innerText = "Fallo";
-        document.getElementById("group-c-score").innerText = "0%";
-        document.getElementById("group-c-cost").innerText = "$0.00000 USD";
-        document.getElementById("group-c-tokens").innerText = "0 tokens";
         
         appState.iaLatency = (performance.now() - start) / 1000;
         runBtn.disabled = false;
@@ -1118,25 +1456,8 @@ async function executeGroupC() {
     document.getElementById("group-c-explanation").innerText = data.explicacion || "";
     document.getElementById("group-c-practices").innerText = data.mejor_practica || "";
     
-    const approvedSpan = document.getElementById("group-c-approved");
-    const isApproved = data.aprobado ?? (data.validacion?.approved);
-    approvedSpan.innerText = isApproved ? "🟢 APROBADO (Cero alucinaciones)" : "🔴 RECHAZADO / ADVERTENCIA";
-    
-    document.getElementById("group-c-score").innerText = `${data.score_tecnico ?? data.validacion?.quality_score ?? 100}%`;
-    document.getElementById("group-c-cost").innerText = `$${(data.costo_estimado || 0).toFixed(5)} USD`;
-    document.getElementById("group-c-tokens").innerText = `${data.total_tokens || 0} tokens`;
-    const sourcesList = document.getElementById("group-c-sources-list");
-    sourcesList.innerHTML = "";
-    const sources = data.fuentes_citadas || [];
-    if (sources.length === 0) {
-        sourcesList.innerHTML = "<li>No se citaron fuentes externas.</li>";
-    } else {
-        sources.forEach(src => {
-            const li = document.createElement("li");
-            li.innerText = src;
-            sourcesList.appendChild(li);
-        });
-    }
+    appState.lastGroupCExplanation = data.explicacion;
+    appState.lastGroupCBestPractices = data.mejor_practica;
 
     runBtn.disabled = false;
     
@@ -1146,7 +1467,11 @@ async function executeGroupC() {
 
 // CONFIGURACIÓN DINÁMICA DEL QUIZ
 function setupQuiz(id) {
-    const scenario = SCENARIOS[id];
+    appState.selectedScenarioId = String(id);
+    appState.selectedJustification = null;
+    appState.tempJustification = null;
+
+    const scenario = SCENARIOS[appState.selectedScenarioId];
     const container = document.getElementById("quiz-questions-container");
     container.innerHTML = "";
 
@@ -1177,6 +1502,7 @@ function setupQuiz(id) {
 // Simular el click sobre la tarjeta del radio button
 window.selectRadioOption = function(element) {
     const radio = element.querySelector('input[type="radio"]');
+    if (!radio) return;
     radio.checked = true;
     
     // Quitar clases previas
@@ -1184,26 +1510,30 @@ window.selectRadioOption = function(element) {
     list.querySelectorAll('.option-item').forEach(item => item.classList.remove('selected'));
     element.classList.add('selected');
 
-    // Si es la pregunta de decisión de cumplimiento (Pregunta 3, índice 2)
+    // Si cambia la Pregunta 3, resetear la justificación previa elegida
     if (radio.name === "q-2") {
-        openGovernancePause(radio.value, element.querySelector('.option-text').innerText);
+        appState.selectedJustification = null;
     }
 };
 
 // Abrir Modal de Pausa de Gobernanza
 function openGovernancePause(optionVal, optionText) {
     const scenario = SCENARIOS[appState.selectedScenarioId];
+    if (!scenario) return;
     const modal = document.getElementById("governance-modal");
     const decisionDisplay = document.getElementById("modal-selected-decision");
     const justificationsContainer = document.getElementById("modal-justifications-list");
     const confirmBtn = document.getElementById("btn-submit-justification");
 
-    decisionDisplay.innerText = optionText.replace(/^\[[A-Z]\]\s*/, ""); // Limpiar la letra de la opción [A]
+    if (!modal || !decisionDisplay || !justificationsContainer || !confirmBtn) return;
+
+    const safeText = String(optionText || optionVal || "");
+    decisionDisplay.innerText = safeText.replace(/^\[[A-Z]\]\s*/, ""); // Limpiar la letra de la opción [A]
     justificationsContainer.innerHTML = "";
     confirmBtn.disabled = true;
     appState.tempJustification = null;
 
-    const justifications = scenario.justifications[optionVal] || [];
+    const justifications = (scenario.justifications && scenario.justifications[optionVal]) ? scenario.justifications[optionVal] : [];
     justifications.forEach((just, idx) => {
         const item = document.createElement("div");
         item.className = "option-item";
@@ -1234,7 +1564,7 @@ function openGovernancePause(optionVal, optionText) {
             item.style.background = "rgba(255, 145, 0, 0.03)";
 
             const rInput = item.querySelector('input[type="radio"]');
-            rInput.checked = true;
+            if (rInput) rInput.checked = true;
             appState.tempJustification = just.key;
             confirmBtn.disabled = false;
         });
@@ -1273,54 +1603,25 @@ function evaluateQuiz() {
     }
     answersGiven["Q3"] = selectedQ3.value;
 
-    // Validar justificación
+    // Validar justificación (Pausa de Gobernanza)
     if (!appState.selectedJustification) {
-        alert("Falta justificar su decisión en la Pausa de Gobernanza. Por favor, vuelva a seleccionar su opción en la Pregunta 3 para abrir la ventana de justificación.");
+        const optionItem = selectedQ3.closest('.option-item');
+        const optionText = optionItem ? optionItem.querySelector('.option-text').innerText : selectedQ3.value;
+        openGovernancePause(selectedQ3.value, optionText);
         return;
     }
 
     appState.answers = answersGiven;
-    // La precisión de diagnóstico mide solo la exactitud fáctica (Q1 y Q2)
     appState.quizScore = Math.round((correctCount / 2) * 100);
 
-    // Pintar Fase 5
-    document.getElementById("display-score").innerText = `${appState.quizScore}%`;
-    document.getElementById("display-ia-latency").innerText = `${appState.iaLatency.toFixed(3)}s`;
-    document.getElementById("display-human-latency").innerText = `${appState.stopwatchElapsed.toFixed(2)}s`;
-    
-    let groupName = "Grupo C: Motor Multi-Agente";
-    if (appState.activeGroup === "A") groupName = "Grupo A: Búsqueda Manual";
-    if (appState.activeGroup === "B") groupName = "Grupo B: IA Básica";
-    document.getElementById("display-group-name").innerText = groupName;
+    const optionItem = selectedQ3.closest('.option-item');
+    const selectedOptionText = optionItem ? optionItem.querySelector('.option-text').innerText : selectedQ3.value;
+    const isCompliant = selectedQ3.value === (scenario.questions[2].correct || "B");
 
-    // Cambiar color del score circle según precisión
-    const circle = document.querySelector(".score-circle");
-    if (appState.quizScore === 100) {
-        circle.style.borderColor = "var(--color-success)";
-        document.getElementById("display-score").style.color = "var(--color-success)";
-    } else if (appState.quizScore >= 50) {
-        circle.style.borderColor = "var(--badge-health)";
-        document.getElementById("display-score").style.color = "var(--badge-health)";
-    } else {
-        circle.style.borderColor = "var(--color-danger)";
-        document.getElementById("display-score").style.color = "var(--color-danger)";
-    }
-
-    // Renderizar consecuencias
-    renderConsequences(appState.selectedScenarioId, selectedQ3.value, appState.selectedJustification);
-
-    // Mostrar/ocultar el cuestionario de confianza según el grupo
-    const trustSurvey = document.getElementById("trust-survey-container");
-    if (appState.activeGroup === "B" || appState.activeGroup === "C") {
-        trustSurvey.classList.remove("hidden");
-        document.querySelectorAll('input[name="trust-rating"]').forEach(r => r.checked = false);
-    } else {
-        trustSurvey.classList.add("hidden");
-    }
-
-    // Registrar en los logs de sesión
+    // Registrar en los logs silenciosos de sesión para el investigador
     const dateStr = new Date().toISOString().replace('T', ' ').substring(0, 19);
     const answersString = Object.entries(appState.answers).map(([k, v]) => `${k}:${v}`).join("; ");
+    let groupName = `Grupo ${appState.activeGroup}`;
     
     let modeloUsado = "N/A";
     if (appState.activeGroup === "B") {
@@ -1329,6 +1630,9 @@ function evaluateQuiz() {
         modeloUsado = appState.isDemoMode ? "Simulado (Multi-Agente)" : "Multi-Agente (Gemini + Groq + R1)";
     }
 
+    const latIaNum = Number(appState.iaLatency) || 0;
+    const latHumNum = Number(appState.stopwatchElapsed) || 0;
+
     appState.csvLogs.push({
         fecha: dateStr,
         participante: appState.participantId,
@@ -1336,52 +1640,142 @@ function evaluateQuiz() {
         experiencia: appState.experience,
         escenario: scenario.title,
         modeloIA: modeloUsado,
-        latencyIA: appState.iaLatency.toFixed(3),
-        latencyHumana: appState.stopwatchElapsed.toFixed(2),
+        latencyIA: latIaNum.toFixed(3),
+        latencyHumana: latHumNum.toFixed(2),
         respuestas: answersString,
         precision: `${appState.quizScore}%`,
         justificacion: appState.selectedJustification,
         confianza: "N/A"
     });
 
-    // Ajustar el botón de reinicio / siguiente corrida según la fase del experimento
-    const btnRestart = document.getElementById("btn-restart");
-    let completionMsg = document.getElementById("completion-msg");
-    
-    if (appState.isDemoMode) {
-        btnRestart.innerText = "Evaluar otro Grupo / Escenario";
-        btnRestart.classList.remove("hidden");
-        if (completionMsg) completionMsg.classList.add("hidden");
-    } else {
-        if (appState.runNumber < 3) {
-            btnRestart.innerText = `Continuar a la Corrida ${appState.runNumber + 1} de 3`;
-            btnRestart.classList.remove("hidden");
-            if (completionMsg) completionMsg.classList.add("hidden");
-        } else {
-            btnRestart.classList.add("hidden");
-            
-            const restartContainer = btnRestart.parentElement;
-            if (!completionMsg) {
-                completionMsg = document.createElement("div");
-                completionMsg.id = "completion-msg";
-                completionMsg.style.marginTop = "12px";
-                completionMsg.style.padding = "14px";
-                completionMsg.style.background = "rgba(0,230,118,0.1)";
-                completionMsg.style.border = "1px solid var(--color-success)";
-                completionMsg.style.borderRadius = "8px";
-                completionMsg.style.fontSize = "0.9rem";
-                completionMsg.style.color = "#00e676";
-                completionMsg.style.width = "100%";
-                completionMsg.style.boxSizing = "border-box";
-                completionMsg.innerHTML = "<strong>🎉 ¡Experimento completado con éxito!</strong> Ha completado las 3 corridas del contrabalanceo. Por favor, descargue su archivo CSV final.";
-                restartContainer.appendChild(completionMsg);
-            } else {
-                completionMsg.classList.remove("hidden");
-            }
+    // Guardar resumen limpio de cumplimiento para la pantalla final del participante
+    appState.completedRuns = appState.completedRuns || [];
+    appState.completedRuns.push({
+        runNumber: appState.runNumber,
+        scenarioId: appState.selectedScenarioId,
+        scenarioTitle: scenario.title,
+        selectedOption: selectedQ3.value,
+        selectedOptionText: selectedOptionText,
+        isCompliant: isCompliant,
+        legalExplanation: appState.lastGroupCExplanation || (MOCK_IA_RESPONSES[appState.selectedScenarioId]?.groupC?.explicacion) || "Análisis de cumplimiento legal completado conforme a la regulación del sector.",
+        bestPractices: appState.lastGroupCBestPractices || (MOCK_IA_RESPONSES[appState.selectedScenarioId]?.groupC?.mejor_practica) || "Recomendación de cumplimiento procesada."
+    });
+
+    // Guardar automáticamente en Firestore en segundo plano (para la investigadora)
+    if (isFirebaseAvailable && db && !appState.isDemoMode) {
+        try {
+            db.collection("respuestas_experimentales").add({
+                codigo_acceso: appState.accessCode,
+                participante_id: appState.participantId,
+                run_number: appState.runNumber,
+                grupo: appState.activeGroup,
+                escenario_id: appState.selectedScenarioId,
+                escenario_titulo: scenario.title,
+                precision: appState.quizScore,
+                latencia_ia: parseFloat(latIaNum.toFixed(3)),
+                latencia_humana: parseFloat(latHumNum.toFixed(2)),
+                justificacion: appState.selectedJustification || "N/A",
+                fecha_registro: new Date().toISOString()
+            });
+            console.log(`✓ [Firebase] Corrida ${appState.runNumber} de 3 guardada en Firestore.`);
+        } catch (e) {
+            console.warn("⚠️ No se pudo guardar automáticamente en Firestore:", e);
         }
     }
 
-    showPhase(5);
+    // Reset de estado temporal de dictamen
+    appState.selectedJustification = null;
+    appState.lastGroupCExplanation = null;
+    appState.lastGroupCBestPractices = null;
+
+    if (appState.runNumber < 3) {
+        // CORRIDAS INTERMEDIAS (1 y 2): Pasar DIRECTAMENTE a la siguiente corrida sin mostrar pantalla de resumen
+        appState.answers = {};
+        appState.quizScore = 0;
+        appState.iaLatency = 0;
+        appState.stopwatchElapsed = 0;
+
+        // Limpieza explícita del formulario quiz anterior (Issue 4)
+        const quizContainer = document.getElementById("quiz-questions-container");
+        if (quizContainer) {
+            quizContainer.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+            quizContainer.querySelectorAll('.option-item').forEach(item => item.classList.remove('selected'));
+        }
+        
+        const searchInput = document.getElementById("manual-search-input");
+        if (searchInput) searchInput.value = "";
+        const searchResults = document.getElementById("manual-search-results");
+        if (searchResults) searchResults.innerHTML = '<div class="no-results">Realice una búsqueda para consultar la base de datos regulatoria.</div>';
+        
+        const bResp = document.getElementById("group-b-response-container");
+        if (bResp) bResp.classList.add("hidden");
+        const cResp = document.getElementById("group-c-response-container");
+        if (cResp) cResp.classList.add("hidden");
+        const btnPhase4 = document.getElementById("btn-to-phase-4");
+        if (btnPhase4) btnPhase4.disabled = true;
+
+        appState.runNumber += 1;
+        
+        const { group, scenarioId } = getExperimentParameters(appState.startingGroup, appState.runNumber);
+        appState.activeGroup = group;
+        appState.selectedScenarioId = scenarioId;
+
+        // Transición DIRECTA a Fase 3 sin pasar por Fase 2 (Issues 1, 2, 3)
+        setupScenario(appState.selectedScenarioId);
+        setupExperimentalUI(appState.activeGroup, appState.isProduction);
+        showPhase(3);
+        startStopwatch();
+    } else {
+        // CORRIDA FINAL (3 de 3): Mostrar ÚNICAMENTE el resumen consolidado de compliance
+        renderFinalComplianceSummaries();
+        showPhase(5);
+    }
+}
+
+// Renderizar únicamente los resúmenes de cumplimiento normativo (sin métricas de comportamientos de IA)
+function renderFinalComplianceSummaries() {
+    const container = document.getElementById("final-compliance-summaries-container");
+    if (!container) return;
+
+    let html = "";
+    
+    (appState.completedRuns || []).forEach((runData) => {
+        const statusBadge = runData.isCompliant
+            ? `<span style="background: rgba(0, 230, 118, 0.1); border: 1px solid #00e676; color: #00e676; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">CUMPLIMIENTO NORMATIVO CORRECTO</span>`
+            : `<span style="background: rgba(255, 74, 74, 0.1); border: 1px solid #ff4a4a; color: #ff4a4a; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">INCUMPLIMIENTO REGULADO DETECTADO</span>`;
+
+        html += `
+            <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                    <h3 style="margin: 0; color: #fff; font-size: 1.1rem;">Escenario ${runData.runNumber}: ${runData.scenarioTitle}</h3>
+                    ${statusBadge}
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 14px; font-size: 0.92rem; color: var(--text-muted); line-height: 1.5;">
+                    <div>
+                        <strong style="color: #fff; font-size: 0.95rem;">Decisión de Cumplimiento Registrada:</strong>
+                        <p style="margin: 4px 0 0 0; background: rgba(255, 255, 255, 0.03); padding: 10px 14px; border-radius: 6px; border-left: 3px solid var(--primary); color: #fff;">
+                            ${runData.selectedOptionText}
+                        </p>
+                    </div>
+                    <div>
+                        <strong style="color: #fff; font-size: 0.95rem;">Explicación y Fundamento Legal de Cumplimiento:</strong>
+                        <p style="margin: 4px 0 0 0; color: var(--text-muted);">
+                            ${runData.legalExplanation}
+                        </p>
+                    </div>
+                    <div>
+                        <strong style="color: #fff; font-size: 0.95rem;">Mejores Prácticas Recomendadas:</strong>
+                        <p style="margin: 4px 0 0 0; color: var(--text-muted);">
+                            ${runData.bestPractices}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
 }
 
 // RENDERIZAR TABLERO DE CONSECUENCIAS (TRIDIMENSIONAL)
@@ -1394,15 +1788,23 @@ function renderConsequences(scenarioId, decisionOption, justificationKey) {
     const cardLegal = document.getElementById("card-impact-legal");
     const cardEthical = document.getElementById("card-impact-ethical");
 
-    if (scenarioId === "1") {
-        if (decisionOption === "A") {
+    if (!textOperational || !textLegal || !textEthical || !cardOperational || !cardLegal || !cardEthical) {
+        console.warn("⚠️ [UI Warning] Algunos elementos del tablero de consecuencias no están en el DOM.");
+        return;
+    }
+
+    const scId = String(scenarioId || "1").trim();
+    const opt = String(decisionOption || "A").trim().toUpperCase();
+
+    if (scId === "1") {
+        if (opt === "A") {
             textOperational.innerHTML = "<strong>🟢 Positivo:</strong> Contención técnica rápida completada con éxito. Se evitó la alarma pública y una corrida bancaria inminente.";
             cardOperational.style.borderLeftColor = "#00e676";
             
             textLegal.innerHTML = "<strong>🔴 Crítico:</strong> Incumplimiento del plazo de 24h establecido por la Circular 2318 del BCU. Riesgo de multa de hasta 2,000,000 UI y suspensión de la licencia de operación.";
             cardLegal.style.borderLeftColor = "#ff4a4a";
             
-            textEthical.innerHTML = `<strong>🟡 Tensión Ponderada:</strong> Se priorizó la estabilidad de liquidez sistémica bajo el marco de **Utilitarismo**. Justificación seleccionada: "${justificationKey === 'utilitarian' ? 'Cálculo de consecuencias netas' : 'Estado de Necesidad'}".`;
+            textEthical.innerHTML = `<strong>🟡 Tensión Ponderada:</strong> Se priorizó la estabilidad de liquidez sistémica bajo el marco de <strong>Utilitarismo</strong>.`;
             cardEthical.style.borderLeftColor = "#ff9100";
         } else {
             textOperational.innerHTML = "<strong>🔴 Crítico:</strong> La alerta prematura provocó la filtración del incidente a la prensa y una corrida de retiros masivos por parte de los ahorradores.";
@@ -1411,18 +1813,18 @@ function renderConsequences(scenarioId, decisionOption, justificationKey) {
             textLegal.innerHTML = "<strong>🟢 Positivo:</strong> Cumplimiento estricto del plazo de 24h establecido por la Circular 2318 del BCU. 0% de riesgo de multas del regulador.";
             cardLegal.style.borderLeftColor = "#00e676";
             
-            textEthical.innerHTML = `<strong>🟡 Tensión Ponderada:</strong> Decisión orientada al **Cumplimiento Formal**. Se respetó el texto legal por encima de la estabilidad colectiva de los depositantes.`;
+            textEthical.innerHTML = `<strong>🟡 Tensión Ponderada:</strong> Decisión orientada al <strong>Cumplimiento Formal</strong>. Se respetó el texto legal por encima de la estabilidad colectiva de los depositantes.`;
             cardEthical.style.borderLeftColor = "#ff9100";
         }
-    } else if (scenarioId === "2") {
-        if (decisionOption === "A") {
+    } else if (scId === "2") {
+        if (opt === "A") {
             textOperational.innerHTML = "<strong>🔴 Negativo:</strong> Notificación apresurada con logs crudos incompletos. Genera alarma social innecesaria y daña la reputación de la clínica.";
             cardOperational.style.borderLeftColor = "#ff4a4a";
             
             textLegal.innerHTML = "<strong>🟢 Positivo:</strong> Notificación inmediata al INAI dentro del plazo legal de 72 horas hábiles de la LGPDPPSO.";
             cardLegal.style.borderLeftColor = "#00e676";
             
-            textEthical.innerHTML = `<strong>🟢 Coherente:</strong> Alineación con la **Deontología** institucional. Se respetó el derecho inalienable de los pacientes a conocer el estado de sus datos clínicos.`;
+            textEthical.innerHTML = `<strong>🟢 Coherente:</strong> Alineación con la <strong>Deontología</strong> institucional. Se respetó el derecho inalienable de los pacientes a conocer el estado de sus datos clínicos.`;
             cardEthical.style.borderLeftColor = "#b55dff";
         } else {
             textOperational.innerHTML = "<strong>🟢 Positivo:</strong> Bloqueo ordenado de credenciales comprometidas y análisis forense limpio antes de emitir comunicados públicos.";
@@ -1431,18 +1833,18 @@ function renderConsequences(scenarioId, decisionOption, justificationKey) {
             textLegal.innerHTML = "<strong>🔴 Negativo:</strong> Retrasar el aviso formal al INAI podría considerarse negligencia o encubrimiento al exceder los plazos de detección de la ley.";
             cardLegal.style.borderLeftColor = "#ff4a4a";
             
-            textEthical.innerHTML = `<strong>🟡 Tensión Ponderada:</strong> Enfoque de consecuencias (**Utilitarismo**). Se priorizó la mitigación reputacional y la contención técnica sobre la autonomía del paciente.`;
+            textEthical.innerHTML = `<strong>🟡 Tensión Ponderada:</strong> Enfoque de consecuencias (<strong>Utilitarismo</strong>). Se priorizó la mitigación reputacional y la contención técnica sobre la autonomía del paciente.`;
             cardEthical.style.borderLeftColor = "#ff9100";
         }
-    } else if (scenarioId === "3") {
-        if (decisionOption === "A") {
+    } else if (scId === "3") {
+        if (opt === "A") {
             textOperational.innerHTML = "<strong>🟢 Positivo:</strong> Unificación del reporte forense transfronterizo en Brasil y Chile, previniendo declaraciones contradictorias.";
             cardOperational.style.borderLeftColor = "#00e676";
             
             textLegal.innerHTML = "<strong>🔴 Crítico:</strong> Incumplimiento del plazo de 3 horas ante el CSIRT de Chile. Riesgo de multa de hasta 15,000 UTM.";
             cardLegal.style.borderLeftColor = "#ff4a4a";
             
-            textEthical.innerHTML = `<strong>🟡 Tensión Ponderada:</strong> Basado en **Utilitarismo Corporativo**. Se priorizó la optimización de costes y la defensa legal sobre los derechos de los usuarios chilenos.`;
+            textEthical.innerHTML = `<strong>🟡 Tensión Ponderada:</strong> Basado en <strong>Utilitarismo Corporativo</strong>. Se priorizó la optimización de costes y la defensa legal sobre los derechos de los usuarios chilenos.`;
             cardEthical.style.borderLeftColor = "#ff9100";
         } else {
             textOperational.innerHTML = "<strong>🔴 Crítico:</strong> Alertar en 3h obligó a enviar logs crudos incompletos, exponiendo la vulnerabilidad activa antes de aplicar el parche de seguridad en Brasil.";
@@ -1451,7 +1853,7 @@ function renderConsequences(scenarioId, decisionOption, justificationKey) {
             textLegal.innerHTML = "<strong>🟢 Positivo:</strong> Cumplimiento total de la inmediatez regulada (límite de 3 horas del CSIRT de Chile).";
             cardLegal.style.borderLeftColor = "#00e676";
             
-            textEthical.innerHTML = `<strong>🟢 Coherente:</strong> Decisión orientada al **Principialismo / No Maleficencia**. Se priorizó alertar rápidamente a los usuarios para prevenir fraudes en sus cuentas.`;
+            textEthical.innerHTML = `<strong>🟢 Coherente:</strong> Decisión orientada al <strong>Principialismo / No Maleficencia</strong>. Se priorizó alertar rápidamente a los usuarios para prevenir fraudes en sus cuentas.`;
             cardEthical.style.borderLeftColor = "#b55dff";
         }
     }
@@ -1512,10 +1914,10 @@ async function runAutoplay(targetPhase) {
     appState.isDemoMode = true;
     appState.participantId = "CISO-DEMO-SIMULADO";
     appState.experience = "Avanzado";
-    document.getElementById("participant-id").value = "CISO-DEMO-SIMULADO";
-    document.getElementById("participant-experience").value = "Avanzado";
-    document.getElementById("gemini-key").value = "••••••••••••••••";
-    document.getElementById("groq-key").value = "••••••••••••••••";
+    const pId = document.getElementById("participant-id"); if (pId) pId.value = "CISO-DEMO-SIMULADO";
+    const pExp = document.getElementById("participant-experience"); if (pExp) pExp.value = "Avanzado";
+    const gK = document.getElementById("gemini-key"); if (gK) gK.value = "••••••••••••••••";
+    const grK = document.getElementById("groq-key"); if (grK) grK.value = "••••••••••••••••";
     
     if (targetPhase === 'phase1') {
         return; // Queda en la pantalla de inicio
@@ -1599,24 +2001,12 @@ function setupExperimentalUI(group, isProduction) {
         }
     }
 
-    // 2. Visibilidad condicional de llaves en Fase 1
-    const credsContainer = document.getElementById("credentials-container");
-    if (credsContainer) {
-        if (group === 'B') {
-            credsContainer.classList.remove("hidden");
-        } else {
-            credsContainer.classList.add("hidden");
-        }
-    }
 
-    // 3. Ocultar barra de pestañas (Tabs) en Fase 3 para blindar el experimento (excepto en modo demo)
+
+    // 3. Ocultar permanentemente la barra de pestañas (Tabs) en Fase 3 para blindar el experimento
     const tabsContainer = document.getElementById("tabs-container");
     if (tabsContainer) {
-        if (appState.isDemoMode) {
-            tabsContainer.classList.remove("hidden");
-        } else {
-            tabsContainer.classList.add("hidden");
-        }
+        tabsContainer.classList.add("hidden");
     }
 
     // 4. Mostrar únicamente el panel correspondiente al grupo activo

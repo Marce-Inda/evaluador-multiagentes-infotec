@@ -29,6 +29,33 @@ except ImportError:
 CSV_PATH = Path(__file__).parent / "resultados_evaluacion.csv"
 REPORT_PATH = Path(__file__).parent / "reporte_estadistico.md"
 
+CORRECT_Q3 = {
+    "Caso 1: Brecha de Datos Financieros (Uruguay)": "B",
+    "Caso 1: Brecha Financiera (Uruguay)": "B",
+    "Caso 2: Filtración de Expedientes Clínicos (México)": "A",
+    "Caso 2: Filtración de Expedientes (México)": "A",
+    "Caso 3: Data Breach Transfronterizo (Brasil/Chile)": "B",
+    "Caso 3: Data Breach (Brasil / Chile)": "B"
+}
+
+CONSISTENT_JUSTIFICATIONS = {
+    "Caso 1: Brecha de Datos Financieros (Uruguay)": ["utilitarian"],
+    "Caso 1: Brecha Financiera (Uruguay)": ["utilitarian"],
+    "Caso 2: Filtración de Expedientes Clínicos (México)": ["deontology"],
+    "Caso 2: Filtración de Expedientes (México)": ["deontology"],
+    "Caso 3: Data Breach Transfronterizo (Brasil/Chile)": ["principialism"],
+    "Caso 3: Data Breach (Brasil / Chile)": ["principialism"]
+}
+
+def extract_q3_choice(answers_str):
+    if not answers_str:
+        return None
+    parts = [p.strip() for p in answers_str.split(";")]
+    for p in parts:
+        if p.startswith("q2:"):
+            return p.split(":")[1].strip()
+    return None
+
 
 def print_header(title: str):
     print("\n" + "=" * 100)
@@ -42,13 +69,15 @@ def calculate_descriptive_pure_python(data):
     for row in data:
         g = row["Grupo_Experimental"]
         if g not in groups:
-            groups[g] = {"ia_latencies": [], "human_latencies": [], "precisions": [], "confianzas": []}
+            groups[g] = {"ia_latencies": [], "human_latencies": [], "precisions": [], "confianzas": [], "infractions": [], "consistencies": []}
         
         groups[g]["ia_latencies"].append(row["Latencia_IA_s"])
         groups[g]["human_latencies"].append(row["Latencia_Humana_s"])
         groups[g]["precisions"].append(row["Precision"])
         if row["Confianza"] is not None:
             groups[g]["confianzas"].append(row["Confianza"])
+        groups[g]["infractions"].append(1.0 if row["Is_Infraction"] else 0.0)
+        groups[g]["consistencies"].append(1.0 if row["Is_Consistent"] else 0.0)
         
     stats_dict = {}
     for g, vals in groups.items():
@@ -59,6 +88,8 @@ def calculate_descriptive_pure_python(data):
         mean_ia = sum(vals["ia_latencies"]) / n
         mean_human = sum(vals["human_latencies"]) / n
         mean_precision = sum(vals["precisions"]) / n
+        mean_infraction = sum(vals["infractions"]) / n
+        mean_consistency = sum(vals["consistencies"]) / n
         
         # Desviaciones estándar
         std_human = 0.0
@@ -89,6 +120,8 @@ def calculate_descriptive_pure_python(data):
             "mean_precision": mean_precision,
             "std_precision": std_precision,
             "mean_trust": mean_trust,
+            "mean_infraction": mean_infraction,
+            "mean_consistency": mean_consistency,
             "raw_human": vals["human_latencies"],
             "raw_precision": vals["precisions"],
             "raw_trust": vals["confianzas"]
@@ -157,13 +190,29 @@ def main():
                 except:
                     confianza_num = None
 
+                scenario_name = row.get("Escenario", "").strip()
+                answers_str = row.get("Respuestas", "").strip()
+                justification = row.get("Justificacion", "").strip()
+                
+                chosen_q3 = extract_q3_choice(answers_str)
+                is_infraction = False
+                if chosen_q3 and scenario_name in CORRECT_Q3:
+                    is_infraction = (chosen_q3 != CORRECT_Q3[scenario_name])
+                    
+                is_consistent = False
+                if justification and scenario_name in CONSISTENT_JUSTIFICATIONS:
+                    is_consistent = (justification in CONSISTENT_JUSTIFICATIONS[scenario_name])
+
                 raw_data.append({
                     "Participante": row["Participante"],
                     "Grupo_Experimental": row["Grupo_Experimental"],
+                    "Modelo_IA": row.get("Modelo_IA", "N/A").strip(),
                     "Latencia_IA_s": float(row["Latencia_IA_s"]),
                     "Latencia_Humana_s": float(row["Latencia_Humana_s"]),
                     "Precision": precision_val,
-                    "Confianza": confianza_num
+                    "Confianza": confianza_num,
+                    "Is_Infraction": is_infraction,
+                    "Is_Consistent": is_consistent
                 })
     except Exception as e:
         print(f"❌ Error al leer el archivo CSV: {e}")
@@ -259,15 +308,15 @@ def main():
         }
 
     # Imprimir resumen descriptivo en consola
-    print("\n" + "-" * 100)
-    print(" ESTADÍSTICAS DESCRIPTIVAS DE GRUPOS ".center(100, "-"))
-    print("-" * 100)
-    print(f"{'Grupo Experimental':<30} | {'N':<3} | {'M. Latencia IA (s)':<18} | {'M. Latencia Hum (s)':<19} | {'M. Precisión (%)':<16} | {'Confianza (1-5)':<15}")
-    print("-" * 100)
+    print("\n" + "-" * 130)
+    print(" ESTADÍSTICAS DESCRIPTIVAS DE GRUPOS ".center(130, "-"))
+    print("-" * 130)
+    print(f"{'Grupo Experimental':<30} | {'N':<3} | {'M. Latencia IA (s)':<18} | {'M. Latencia Hum (s)':<19} | {'M. Precisión (%)':<16} | {'Confianza (1-5)':<15} | {'I_C (%)':<8} | {'C_EO (%)':<8}")
+    print("-" * 130)
     for g, m in summary.items():
         conf_str = f"{m['mean_trust']:.2f}" if m['mean_trust'] is not None and not (isinstance(m['mean_trust'], float) and math.isnan(m['mean_trust'])) else "N/A (Manual)"
-        print(f"{g[:30]:<30} | {m['n']:<3} | {m['mean_ia']:<18.3f} | {m['mean_human']:<19.2f} | {m['mean_precision']:<16.1f} | {conf_str:<15}")
-    print("-" * 100)
+        print(f"{g[:30]:<30} | {m['n']:<3} | {m['mean_ia']:<18.3f} | {m['mean_human']:<19.2f} | {m['mean_precision']:<16.1f} | {conf_str:<15} | {m['mean_infraction']*100:<8.1f} | {m['mean_consistency']*100:<8.1f}")
+    print("-" * 130)
     
     # Imprimir pruebas de hipótesis
     print("\n" + "-" * 100)
@@ -300,6 +349,44 @@ def main():
             print(f"    - p-valor: {p_trust:.5f} ({sig_trust})")
     print("-" * 100)
     
+    # ----------------------------------------------------
+    # Análisis de Sesgo Geopolítico (Llama/Gemini vs DeepSeek)
+    # ----------------------------------------------------
+    group_b_data = [r for r in raw_data if r["Grupo_Experimental"] == "Grupo B: IA Básica"]
+    
+    western_models = ["llama", "gemini"]
+    eastern_models = ["deepseek"]
+    
+    western_runs = [r for r in group_b_data if any(w in r["Modelo_IA"].lower() for w in western_models)]
+    eastern_runs = [r for r in group_b_data if any(e in r["Modelo_IA"].lower() for e in eastern_models)]
+    
+    geopolitical_stats = {}
+    for label, runs in [("Occidentales (Llama/Gemini)", western_runs), ("Orientales (DeepSeek)", eastern_runs)]:
+        n = len(runs)
+        if n > 0:
+            mean_lat = sum(r["Latencia_Humana_s"] for r in runs) / n
+            mean_prec = sum(r["Precision"] for r in runs) / n
+            trust_vals = [r["Confianza"] for r in runs if r["Confianza"] is not None]
+            mean_trust = sum(trust_vals) / len(trust_vals) if len(trust_vals) > 0 else None
+            geopolitical_stats[label] = {
+                "n": n,
+                "mean_lat": mean_lat,
+                "mean_prec": mean_prec,
+                "mean_trust": mean_trust
+            }
+        else:
+            geopolitical_stats[label] = {"n": 0, "mean_lat": 0.0, "mean_prec": 0.0, "mean_trust": None}
+            
+    print("\n" + "-" * 100)
+    print(" ANÁLISIS DE SESGO GEOPOLÍTICO EN GRUPO B (OCCIDENTE VS. ORIENTE) ".center(100, "-"))
+    print("-" * 100)
+    print(f"{'Origen del Modelo':<30} | {'N':<3} | {'M. Latencia Hum (s)':<19} | {'M. Precisión (%)':<16} | {'Confianza (1-5)':<15}")
+    print("-" * 100)
+    for label, m in geopolitical_stats.items():
+        conf_str = f"{m['mean_trust']:.2f}" if m['mean_trust'] is not None else "N/A"
+        print(f"{label:<30} | {m['n']:<3} | {m['mean_lat']:<19.2f} | {m['mean_prec']:<16.1f} | {conf_str:<15}")
+    print("-" * 100)
+    
     # Generar Reporte Markdown
     try:
         with open(REPORT_PATH, "w", encoding="utf-8") as f:
@@ -308,11 +395,11 @@ def main():
             f.write(f"**Total de Muestras Analizadas:** {len(raw_data)} pruebas\n\n")
             
             f.write("## 1. Estadísticas Descriptivas\n\n")
-            f.write("| Grupo Experimental | Muestras (N) | Media Latencia IA (s) | Media Latencia Humana (s) | Desv. Est. Humana (s) | Media Precisión (%) | Confiabilidad Promedio (1-5) |\n")
-            f.write("| :--- | :---: | :---: | :---: | :---: | :---: | :---: |\n")
+            f.write("| Grupo Experimental | Muestras (N) | Media Latencia IA (s) | Media Latencia Humana (s) | Desv. Est. Humana (s) | Media Precisión (%) | Confiabilidad Promedio (1-5) | Tasa Infracción $I_C$ (%) | Consistencia $C_{EO}$ (%) |\n")
+            f.write("| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n")
             for g, m in summary.items():
                 conf_val = f"{m['mean_trust']:.2f}" if m['mean_trust'] is not None and not (isinstance(m['mean_trust'], float) and math.isnan(m['mean_trust'])) else "N/A (Manual)"
-                f.write(f"| {g} | {m['n']} | {m['mean_ia']:.3f} | {m['mean_human']:.2f} | {m['std_human']:.2f} | {m['mean_precision']:.1f}% | {conf_val} |\n")
+                f.write(f"| {g} | {m['n']} | {m['mean_ia']:.3f} | {m['mean_human']:.2f} | {m['std_human']:.2f} | {m['mean_precision']:.1f}% | {conf_val} | {m['mean_infraction']*100:.1f}% | {m['mean_consistency']*100:.1f}% |\n")
                 
             f.write("\n## 2. Pruebas de Hipótesis y Significancia (Comparaciones Intrasujeto frente a Grupo C)\n\n")
             f.write("Dado que el experimento utiliza un diseño intrasujeto, las observaciones de un mismo participante están relacionadas. Se aplican la **Prueba t para muestras relacionadas** y la **Prueba de rangos con signo de Wilcoxon** para evaluar significancia.\n\n")
@@ -334,7 +421,16 @@ def main():
                 
                 f.write(f"| {name} | {t['n_paired']} | {p_lat_str} | {sig_lat} | {p_prec_str} | {sig_prec} | {p_trust_str} | {sig_trust} |\n")
                 
-            f.write("\n## 3. Discusión de Resultados Académicos\n\n")
+            f.write("\n## 3. Análisis de Sesgo Geopolítico en Grupo B (Occidente vs. Oriente)\n\n")
+            f.write("Este análisis evalúa el rendimiento del participante bajo la asistencia de modelos de IA de origen Occidental (Google Gemini, Meta Llama) frente a modelos Orientales/Chinos (DeepSeek), analizando diferencias en latencia humana de decisión, precisión objetiva y nivel de confianza percibida.\n\n")
+            f.write("| Origen del Modelo | Muestras (N) | Media Latencia Humana (s) | Media Precisión (%) | Confiabilidad Promedio (1-5) |\n")
+            f.write("| :--- | :---: | :---: | :---: | :---: |\n")
+            for label, m in geopolitical_stats.items():
+                conf_val = f"{m['mean_trust']:.2f}" if m['mean_trust'] is not None else "N/A"
+                f.write(f"| {label} | {m['n']} | {m['mean_lat']:.2f}s | {m['mean_prec']:.1f}% | {conf_val} |\n")
+            f.write("\n*Nota: La diferencia en latencia y confianza refleja la susceptibilidad de los perfiles ante las alucinaciones o respuestas incompletas de cada modelo geopolítico.*\n")
+            
+            f.write("\n## 4. Discusión de Resultados Académicos\n\n")
             f.write("*   **Diseño Intrasujeto Balanceado:** El emparejamiento por participante cancela diferencias individuales de perfil técnico, aislando la verdadera efectividad del motor multi-agente.\n")
             f.write("*   **Latencia Humana:** Evalúa si el asistente multi-agente acelera la toma de decisiones críticas reguladas.\n")
             f.write("*   **Precisión de Cumplimiento y Alucinaciones:** Dado que las preguntas clave indagan sobre plazos y autoridades sujetas a error/alucinación en IA estándar, la precisión del quiz valida la efectividad del *Governance Agent*.\n")
