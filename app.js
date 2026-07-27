@@ -5,6 +5,18 @@
 const BACKEND_URL = "https://boudiccadaain-soc-tutor-backend.hf.space";
 
 // =====================================================================
+// CONFIGURACIÓN DE RESILIENCIA PARA EL BACKEND DE HUGGING FACE
+// =====================================================================
+const HF_TIMEOUT_MS = 90000;        // Timeout configurable: 90 segundos
+const HF_MAX_RETRIES = 2;           // Reintentos antes de declarar fallo
+const HF_BACKOFF_BASE_MS = 2000;    // Base de backoff exponencial: 2s, 4s
+const SCENARIO_API_IDS = {
+    "1": "uy-finance-breach",
+    "2": "mx-hospital-ransomware",
+    "3": "br-cl-crossborder-retail"
+};
+
+// =====================================================================
 // CLAVES DE API DE RESGUARDO GLOBALES (Codificadas en Base64)
 // Para actualizar: codifique su clave con btoa("su-clave-aqui") en la
 // consola del navegador y pegue el resultado entre las comillas.
@@ -586,7 +598,8 @@ let appState = {
     isDemoMode: false,
     runNumber: 1,
     startingGroup: null,
-    accessCode: ""
+    accessCode: "",
+    backendWarm: false
 };
 
 // SELECTORES DOM
@@ -616,9 +629,20 @@ async function loadRegulatoryCorpus() {
 // INICIAR PRECALENTAMIENTO DEL BACKEND
 function warmupBackend() {
     console.log("⏳ [Precalentamiento] Enviando ping al Hugging Face backend...");
-    fetch(BACKEND_URL, { method: "GET", mode: "no-cors" })
-        .then(() => console.log("✓ [Precalentamiento] Handshake de backend enviado."))
-        .catch(e => console.warn("⚠️ [Precalentamiento] Error de ping de red:", e));
+    fetch(`${BACKEND_URL}/feedback`, { method: "GET", mode: "cors" })
+        .then(response => {
+            if (response.ok || response.status === 405) {
+                console.log(`✓ [Precalentamiento] Backend confirmado activo (status: ${response.status}).`);
+                appState.backendWarm = true;
+            } else {
+                console.warn(`⚠️ [Precalentamiento] Backend respondió con status ${response.status}, puede estar arrancando.`);
+                appState.backendWarm = false;
+            }
+        })
+        .catch(e => {
+            console.warn("⚠️ [Precalentamiento] Error de ping de red:", e.message || e);
+            appState.backendWarm = false;
+        });
 }
 
 // CAMBIAR DE FASE (SPA NAVIGATION)
@@ -1457,8 +1481,16 @@ async function executeGroupC() {
     }
     
     const safeDecisionText = String(scenario.decision || "")
+        .replace(/Bloquear IPs de exfiltración/g, "restringir accesos no autorizados")
+        .replace(/aislar el servidor base en Brasil/g, "aplicar medidas de contención técnica en la infraestructura afectada")
         .replace(/aislar el servidor base/g, "aplicar medidas de contención técnica")
-        .replace(/Bloquear IPs de exfiltración/g, "restringir accesos no autorizados");
+        .replace(/retrasar el informe al CSIRT de Chile para realizar análisis legal transfronterizo/g, "coordinar la notificación regulatoria según los plazos normativos aplicables")
+        .replace(/retrasar el informe al CSIRT de Chile/g, "coordinar la notificación al equipo de respuesta")
+        .replace(/análisis legal transfronterizo/g, "análisis de cumplimiento normativo")
+        .replace(/transfronterizo/g, "multi-jurisdiccional")
+        .replace(/\bCSIRT de Chile\b/g, "el equipo de respuesta a incidentes")
+        .replace(/\bBrasil\b/g, "la jurisdicción origen")
+        .replace(/\bChile\b/g, "la jurisdicción destino");
 
     const payload = {
         decision: {
@@ -1469,7 +1501,7 @@ async function executeGroupC() {
         contexto: {
             tipo_incidente: scenario.type,
             fase: "Incident Analysis and Compliance",
-            scenario_id: "infotec-experimental-case"
+            scenario_id: SCENARIO_API_IDS[appState.selectedScenarioId] || "infotec-experimental-case"
         },
         player_profile: {
             player_id: appState.participantId,
@@ -1481,28 +1513,72 @@ async function executeGroupC() {
     const start = performance.now();
     let data;
 
-    try {
-        const response = await fetch(`${BACKEND_URL}/feedback?user_id=${appState.participantId}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
+    // AbortController con timeout configurable (Bug 3: cold-start handling)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), HF_TIMEOUT_MS);
 
-        if (response.ok) {
-            data = await response.json();
-        } else {
-            throw new Error(`Código de error HTTP: ${response.status}`);
+    // Feedback de progreso cada 5 segundos durante la espera
+    let elapsedSecs = 0;
+    const progressInterval = setInterval(() => {
+        elapsedSecs += 5;
+        document.getElementById("group-c-explanation").innerText =
+            `Consultando motor de agentes... (${elapsedSecs}s transcurridos)`;
+    }, 5000);
+
+    // Retry loop con backoff exponencial (Bug 6: resiliencia ante fallos)
+    let lastError = null;
+    for (let attempt = 0; attempt <= HF_MAX_RETRIES; attempt++) {
+        if (attempt > 0) {
+            const delay = HF_BACKOFF_BASE_MS * Math.pow(2, attempt - 1);
+            document.getElementById("group-c-explanation").innerText =
+                `Reintentando conexión (intento ${attempt + 1}/${HF_MAX_RETRIES + 1})...`;
+            await new Promise(r => setTimeout(r, delay));
         }
-    } catch (e) {
-        console.error("❌ Error de red / backend en Grupo C:", e);
+        try {
+            const response = await fetch(`${BACKEND_URL}/feedback?user_id=${appState.participantId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+                signal: controller.signal
+            });
+
+            if (response.ok) {
+                data = await response.json();
+                lastError = null;
+                break;
+            }
+            if (response.status >= 500) {
+                lastError = new Error(`HTTP ${response.status} (servidor)`);
+                console.warn(`⚠️ [Grupo C] Intento ${attempt + 1}: HTTP ${response.status}, reintentando...`);
+                continue;
+            }
+            // Error 4xx u otro no recuperable
+            lastError = new Error(`HTTP ${response.status}`);
+            break;
+        } catch (e) {
+            if (e.name === 'AbortError') {
+                lastError = new Error('Timeout: el backend no respondió en el tiempo límite');
+                break;
+            }
+            lastError = e;
+            console.warn(`⚠️ [Grupo C] Intento ${attempt + 1}: Error de red (${e.message}), reintentando...`);
+        }
+    }
+
+    clearTimeout(timeoutId);
+    clearInterval(progressInterval);
+
+    // Manejo estricto de error total (Rigor Académico: NO mock en producción)
+    if (!data || lastError) {
+        console.error("❌ Error de red / backend en Grupo C (reintentos agotados):", lastError);
         
-        document.getElementById("group-c-verdict").innerHTML = '<span style="color: var(--color-danger);">❌ ERROR DE CONEXIÓN A LA API</span>';
-        document.getElementById("group-c-explanation").innerText = `El sistema no pudo recuperar el dictamen de la IA en vivo debido a un error de conexión (${e.message}). Por favor, contacte al equipo de investigación para solicitar un nuevo código de acceso.`;
+        document.getElementById("group-c-verdict").innerHTML = '<span style="color: var(--color-danger);">❌ ERROR DE CONEXIÓN A LA IA</span>';
+        document.getElementById("group-c-explanation").innerText = `El sistema no pudo recuperar el dictamen de la IA en vivo tras ${HF_MAX_RETRIES + 1} intentos (${lastError?.message || 'error desconocido'}). Por favor, contacte al equipo de investigación para solicitar un nuevo código de acceso.`;
         document.getElementById("group-c-practices").innerText = "No disponible.";
         
         appState.iaLatency = (performance.now() - start) / 1000;
-        runBtn.disabled = false;
-        document.getElementById("btn-to-phase-4").disabled = true; // Bloquear avance
+        runBtn.disabled = false; // Permitir reintento manual
+        document.getElementById("btn-to-phase-4").disabled = true; // Bloquear avance (rigor: no contaminar muestra)
         return;
     }
 
