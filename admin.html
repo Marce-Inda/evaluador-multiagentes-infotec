@@ -346,7 +346,8 @@
                     <h1>Panel de Control de Reclutamiento</h1>
                     <p>Revisa solicitudes y asigna códigos de acceso para participantes</p>
                 </div>
-                <div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn" style="background: rgba(255, 74, 74, 0.15); color: var(--danger); border: 1px solid rgba(255, 74, 74, 0.4);" onclick="purgeTestData()">🗑️ Limpiar Datos de Prueba</button>
                     <button class="btn" onclick="logout()">Cerrar Sesión</button>
                 </div>
             </header>
@@ -544,6 +545,12 @@
                 } else {
                     actionCell = `<span style="color: var(--text-muted);">Rechazado</span>`;
                 }
+                
+                actionCell += `
+                    <div style="margin-top:8px;">
+                        <button class="btn-action" style="background:rgba(255,74,74,0.15); color:var(--danger); border:1px solid rgba(255,74,74,0.3); font-size:0.75rem; padding:4px 8px; border-radius:6px; cursor:pointer;" onclick="deleteCandidate('${c.id}', '${escapeHtml(c.correo)}')">🗑️ Eliminar</button>
+                    </div>
+                `;
 
                 const detailsText = `
                     ${profileBadge}<br>
@@ -625,6 +632,99 @@
             } catch (error) {
                 console.error("Error al rechazar candidato:", error);
                 alert("Error: " + error.message);
+            }
+        }
+
+        async function deleteCandidate(id, email) {
+            if (!db) return;
+            if (!confirm(`¿Desea eliminar permanentemente el registro de ${email} y sus respuestas asociadas?`)) return;
+
+            try {
+                const candDoc = await db.collection("solicitudes_convocatoria").doc(id).get();
+                if (candDoc.exists) {
+                    const candData = candDoc.data();
+                    if (candData.codigo_generado) {
+                        const rSnap = await db.collection("respuestas_experimentales").where("accessCode", "==", candData.codigo_generado).get();
+                        rSnap.forEach(d => d.ref.delete());
+                        await db.collection("codigos_acceso").doc(candData.codigo_generado).delete();
+                    }
+                    await db.collection("solicitudes_convocatoria").doc(id).delete();
+                }
+                alert(`✅ Registro de ${email} eliminado.`);
+            } catch (error) {
+                console.error("Error al eliminar candidato:", error);
+                alert("Error: " + error.message);
+            }
+        }
+
+        async function purgeTestData() {
+            if (!db) return;
+            
+            const action = prompt(
+                "¡ATENCIÓN! Esta acción eliminará registros de prueba en Firebase.\n\n" +
+                "Escribe:\n" +
+                " 1  - Para borrar SOLO el último código/solicitud\n" +
+                " ALL - Para BORRAR TODO (respuestas, códigos y solicitudes)\n" +
+                " O ingresa un correo específico para borrar sus datos."
+            );
+
+            if (!action) return;
+
+            try {
+                if (action.trim() === "ALL") {
+                    if (!confirm("⚠️ ¿Estás COMPLETAMENTE SEGURA de eliminar TODOS los registros de Firebase? Esta acción no se puede deshacer.")) return;
+                    
+                    // Borrar respuestas experimentales
+                    const respSnap = await db.collection("respuestas_experimentales").get();
+                    const batch1 = db.batch();
+                    respSnap.forEach(doc => batch1.delete(doc.ref));
+                    await batch1.commit();
+
+                    // Borrar códigos de acceso
+                    const codSnap = await db.collection("codigos_acceso").get();
+                    const batch2 = db.batch();
+                    codSnap.forEach(doc => batch2.delete(doc.ref));
+                    await batch2.commit();
+
+                    // Borrar solicitudes convocatoria
+                    const solSnap = await db.collection("solicitudes_convocatoria").get();
+                    const batch3 = db.batch();
+                    solSnap.forEach(doc => batch3.delete(doc.ref));
+                    await batch3.commit();
+
+                    alert("✅ ¡Toda la base de datos de Firebase ha sido limpiada con éxito!");
+                } else if (action.includes("@")) {
+                    const email = action.trim().toLowerCase();
+                    const candSnap = await db.collection("solicitudes_convocatoria").where("correo", "==", email).get();
+                    
+                    if (candSnap.empty) {
+                        alert(`No se encontró ninguna solicitud con el correo: ${email}`);
+                        return;
+                    }
+
+                    candSnap.forEach(async (candDoc) => {
+                        const candData = candDoc.data();
+                        
+                        // Eliminar respuestas
+                        if (candData.codigo_generado) {
+                            const rSnap = await db.collection("respuestas_experimentales").where("accessCode", "==", candData.codigo_generado).get();
+                            rSnap.forEach(d => d.ref.delete());
+                            
+                            // Eliminar codigo
+                            await db.collection("codigos_acceso").doc(candData.codigo_generado).delete();
+                        }
+                        
+                        // Eliminar candidato
+                        await candDoc.ref.delete();
+                    });
+
+                    alert(`✅ Registros asociados a ${email} eliminados correctamente.`);
+                } else {
+                    alert("Operación cancelada o código no válido.");
+                }
+            } catch (error) {
+                console.error("Error al limpiar datos:", error);
+                alert("Error al purgar datos en Firebase: " + error.message);
             }
         }
 

@@ -40,7 +40,14 @@ service cloud.firestore {
       // allow create, delete: if request.auth != null && request.auth.token.email == "tu_correo_investigador@gmail.com";
       //
       // OPCIÓN B (Modo Rápido / Desarrollo):
-      allow create, delete: if true;
+      allow create, delete, read, list: if true;
+    }
+
+    /*
+     * 3. REGLAS PARA LA COLECCIÓN: respuestas_experimentales
+     */
+    match /respuestas_experimentales/{respuestaId} {
+      allow create, read, update, delete, list: if true;
     }
   }
 }
